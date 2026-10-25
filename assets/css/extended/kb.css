@@ -454,7 +454,18 @@
 
 /* ---------------------------------------------------------------- 书架 */
 
-/* 标题居中，加号固定在右上角 */
+/* 书架是站点的外层壳：站名、导航、页脚都属于「书」内部，这里不显示 */
+body:has(.kb-shelf-page) .header,
+body:has(.kb-shelf-page) .footer {
+    display: none;
+}
+
+body:has(.kb-shelf-page) .main {
+    min-height: 100vh;
+    padding-top: 34px;
+}
+
+/* 标题居中，添加书固定在右上角 */
 .kb-shelf-head {
     position: relative;
     margin: 6px 0 0;
@@ -472,11 +483,13 @@
     position: absolute;
     top: 50%;
     right: 0;
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    font-size: 22px;
-    font-weight: 400;
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    height: 30px;
+    padding: 0 11px;
+    font-size: 12px;
+    font-weight: 500;
     line-height: 1;
     color: var(--secondary);
     background: transparent;
@@ -485,6 +498,12 @@
     cursor: pointer;
     transform: translateY(-50%);
     transition: color .15s ease, border-color .15s ease;
+}
+
+.kb-shelf-add__plus {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1;
 }
 
 .kb-shelf-add:hover {
@@ -850,9 +869,13 @@
     }
 
     .kb-shelf-add {
-        width: 30px;
-        height: 30px;
-        font-size: 19px;
+        height: 27px;
+        padding: 0 9px;
+        font-size: 11px;
+    }
+
+    .kb-shelf-add__plus {
+        font-size: 13px;
     }
 
     .kb-book {

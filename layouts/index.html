@@ -10,7 +10,10 @@
 <div class="kb-shelf-page">
   <header class="kb-shelf-head">
     <h1>书架</h1>
-    <button type="button" class="kb-shelf-add" data-newbook aria-label="新建一本书" title="新建一本书">+</button>
+    <button type="button" class="kb-shelf-add" data-newbook aria-label="添加一本书" title="添加一本书">
+      <span class="kb-shelf-add__plus" aria-hidden="true">+</span>
+      <span class="kb-shelf-add__text">添加书</span>
+    </button>
   </header>
 
   {{- if $books }}

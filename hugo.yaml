@@ -51,12 +51,10 @@ params:
       title: "发送邮件给我"
 
 # 菜单配置
+# 「书架」不在菜单里：书架是站点的外层壳（首页），站名「知识地图」即返回书架的入口，
+# 导航只保留书内部（笔记/标签/归档/搜索/历史/关于），这些只在点开一本书之后出现。
 menu:
   main:
-    - identifier: shelf
-      name: 书架
-      url: /
-      weight: 10
     - identifier: notes
       name: 笔记
       url: /notes/
