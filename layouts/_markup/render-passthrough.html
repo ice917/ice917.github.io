@@ -1,0 +1,18 @@
+{{- /*
+  LaTeX 公式渲染钩子。
+  goldmark 的 passthrough 扩展把 $$...$$ / \[...\] / \(...\) 原样交到这里，
+  再用 Hugo 内置的 transform.ToMath（KaTeX）在构建期转成 MathML。
+
+  为什么选 output=mathml：
+    - 不需要引入 katex.css，也不需要字体文件（MathML 由浏览器原生排版）
+    - 页面加载零额外请求，离线可用
+  代价：排版精细度略低于 KaTeX 的 HTML 输出（例如复杂矩阵的对齐）。
+*/ -}}
+{{- $opts := dict "output" "mathml" "displayMode" (eq .Type "block") -}}
+{{- with try (transform.ToMath .Inner $opts) -}}
+  {{- with .Err -}}
+    {{- errorf "公式渲染失败（%s）：%s" $.Page.File.Path . -}}
+  {{- else -}}
+    {{- .Value -}}
+  {{- end -}}
+{{- end -}}

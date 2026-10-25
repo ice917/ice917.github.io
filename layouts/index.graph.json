@@ -1,0 +1,74 @@
+{{- /*
+  知识地图的图数据。
+  节点 = 笔记（content/notes/*.md） + 标签枢纽
+  边   = 笔记→标签（front matter 里的 tags）
+        笔记→笔记（正文里的 /notes/<slug>/ 链接）
+  单一事实源：这里不写死任何关系，全部从内容文件推导。
+*/ -}}
+{{- $pages := where site.RegularPages "Section" "notes" -}}
+{{- $nodes := slice -}}
+{{- $links := slice -}}
+
+{{- /* ---------- 笔记节点 ---------- */ -}}
+{{- range $pages -}}
+  {{- $slug := .File.ContentBaseName -}}
+  {{- $nodes = $nodes | append (dict
+      "id" $slug
+      "label" .Title
+      "url" .RelPermalink
+      "kind" "note"
+      "date" (.Date.Format "2006-01-02")
+      "summary" (.Summary | plainify | truncate 100 "")
+  ) -}}
+{{- end -}}
+
+{{- /* ---------- 标签枢纽节点 ---------- */ -}}
+{{- $tagTerms := slice -}}
+{{- range $pages -}}
+  {{- range .Params.tags -}}
+    {{- $tagTerms = $tagTerms | append . -}}
+  {{- end -}}
+{{- end -}}
+{{- $tagTerms = $tagTerms | uniq | sort -}}
+
+{{- range $tagTerms -}}
+  {{- $t := . -}}
+  {{- $tagURL := printf "/tags/%s/" $t -}}
+  {{- with site.GetPage (printf "/tags/%s" $t) -}}
+    {{- $tagURL = .RelPermalink -}}
+  {{- end -}}
+  {{- $nodes = $nodes | append (dict
+      "id" (printf "tag:%s" $t)
+      "label" $t
+      "url" $tagURL
+      "kind" "tag"
+  ) -}}
+{{- end -}}
+
+{{- /* ---------- 边 ---------- */ -}}
+{{- range $pages -}}
+  {{- $slug := .File.ContentBaseName -}}
+
+  {{- /* 标签归属边 */ -}}
+  {{- range .Params.tags -}}
+    {{- $links = $links | append (dict
+        "source" $slug
+        "target" (printf "tag:%s" .)
+        "kind" "tag"
+    ) -}}
+  {{- end -}}
+
+  {{- /* 正文互链边：识别 /notes/<slug>/ 形式 */ -}}
+  {{- range findRE `/notes/[A-Za-z0-9_\-]+` .RawContent -}}
+    {{- $target := . | replaceRE `^/notes/` "" | replaceRE `\.md$` "" -}}
+    {{- if ne $target $slug -}}
+      {{- $links = $links | append (dict
+          "source" $slug
+          "target" $target
+          "kind" "link"
+      ) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- dict "nodes" $nodes "links" $links | jsonify (dict "indent" "  ") -}}

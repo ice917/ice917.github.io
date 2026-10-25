@@ -1,0 +1,113 @@
+baseURL: https://ice917.github.io/
+locale: zh-cn
+title: 知识地图
+theme: PaperMod
+
+# 启用 emoji 支持
+enableEmoji: true
+
+# 启用 robots.txt
+enableRobotsTXT: true
+
+# 每页显示的文章数
+pagination:
+  pagerSize: 10
+
+# 语言设置
+languages:
+  zh:
+    label: "中文"
+    weight: 1
+
+# PaperMod 主题配置
+params:
+  # 基础信息
+  author: "ice"
+  description: "以地图展开的个人知识学习库"
+
+  # 双主题：默认跟随系统，右上角按钮可手动切换（localStorage: pref-theme）
+  defaultTheme: auto
+
+  # 显示设置
+  ShowReadingTime: true
+  ShowShareButtons: false
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowWordCount: true
+  ShowRssButtonInSectionTermList: true
+
+  # 首页由 layouts/index.html 接管（知识地图），不使用 Profile 模式
+  profileMode:
+    enabled: false
+
+  # 社交图标
+  socialIcons:
+    - name: github
+      url: "https://github.com/yourname"
+      title: "访问我的 GitHub"
+    - name: email
+      url: "mailto:your@email.com"
+      title: "发送邮件给我"
+
+# 菜单配置
+menu:
+  main:
+    - identifier: map
+      name: 地图
+      url: /
+      weight: 10
+    - identifier: notes
+      name: 笔记
+      url: /notes/
+      weight: 20
+    - identifier: tags
+      name: 标签
+      url: /tags/
+      weight: 30
+    - identifier: archives
+      name: 归档
+      url: /archives/
+      weight: 40
+    - identifier: search
+      name: 搜索
+      url: /search/
+      weight: 50
+    - identifier: history
+      name: 历史
+      url: /history/
+      weight: 55
+    - identifier: about
+      name: 关于
+      url: /about/
+      weight: 60
+
+# Markdown：把 LaTeX 公式原样交给渲染钩子（见 layouts/_markup/render-passthrough.html）
+# 公式在构建期由 Hugo 用 KaTeX 转成 MathML，浏览器端不需要任何 JS/CSS/字体
+markup:
+  goldmark:
+    extensions:
+      passthrough:
+        enable: true
+        delimiters:
+          block:
+            - ["$$", "$$"]
+            - ["\\[", "\\]"]
+          inline:
+            - ["\\(", "\\)"]
+
+# 自定义输出格式：知识地图的图数据（构建期从内容生成，单一事实源）
+outputFormats:
+  Graph:
+    mediaType: application/json
+    baseName: graph
+    isPlainText: true
+    notAlternative: true
+
+# 输出格式
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+    - Graph

@@ -1,0 +1,31 @@
+{{- /* 笔记正文之后：这篇笔记的局部知识地图（1 跳邻域） */ -}}
+{{- if and .IsPage (eq .Section "notes") .File -}}
+{{- $slug := .File.ContentBaseName -}}
+<section class="kb-neighbors">
+  <h2>这篇笔记在知识地图中的位置</h2>
+  <div class="kb-graph"
+       data-graph="{{ "graph.json" | relURL }}"
+       data-mode="focus"
+       data-focus="{{ $slug }}"
+       data-depth="1"
+       data-height="380">
+    <div class="kb-graph__bar">
+      <label class="kb-search">
+        <input type="search" placeholder="在邻域里搜索…" aria-label="搜索邻域节点">
+      </label>
+      <button type="button" class="kb-reset">复位</button>
+    </div>
+    <div class="kb-graph__stage">
+      <canvas role="img" aria-label="这篇笔记及其相邻笔记、标签的关系图"></canvas>
+      <div class="kb-tip" hidden></div>
+    </div>
+    <div class="kb-graph__foot">
+      <div class="kb-legend">
+        <span><i class="kb-dot"></i>笔记</span>
+        <span><i class="kb-dot kb-dot--tag"></i>标签</span>
+      </div>
+      <span class="kb-status">正在加载…</span>
+    </div>
+  </div>
+</section>
+{{- end -}}

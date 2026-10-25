@@ -1,0 +1,21 @@
+{{ define "main" }}
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">{{ .Title }}</h1>
+  </header>
+
+  <div class="post-content">
+    <p>这一页的内容由浏览器本地生成：每次打开一个页面，脚本就把它的地址、标题和时间写进 <code>localStorage</code>（键名 <code>kb-history</code>）。数据只在本机，不上传、不同步；换浏览器、换设备或清除站点数据都会清空。</p>
+    <p>下面按「最近访问」排序。点标题可以直接跳回去；右侧是该页所属板块、最后一次访问时间，以及累计访问次数（<code>×N</code>）。</p>
+
+    <div class="kb-history-bar">
+      <div id="kb-history-summary" class="kb-history-summary"></div>
+      <button id="kb-history-clear" class="kb-history-clear" type="button">清空记录</button>
+    </div>
+
+    <div id="kb-history-list" class="kb-history-list">
+      <p class="kb-history-empty">正在读取本地记录…</p>
+    </div>
+  </div>
+</article>
+{{ end }}

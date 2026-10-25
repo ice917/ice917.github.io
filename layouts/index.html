@@ -1,0 +1,53 @@
+{{- define "main" }}
+{{- $notes := where site.RegularPages "Section" "notes" -}}
+{{- $tags := slice -}}
+{{- range $notes -}}
+{{- range .Params.tags -}}{{- $tags = $tags | append . -}}{{- end -}}
+{{- end -}}
+{{- $tags = uniq $tags -}}
+<div class="kb-home">
+  <section class="kb-hero">
+    <h1>{{ site.Title }}</h1>
+    <p>{{ site.Params.description }}</p>
+    <div class="kb-stats">
+      <span><b>{{ len $notes }}</b> 篇笔记</span>
+      <span><b>{{ len $tags }}</b> 个标签</span>
+      <span><b>{{ len site.RegularPages }}</b> 个知识条目</span>
+    </div>
+  </section>
+
+  <div class="kb-graph" data-graph="{{ "graph.json" | relURL }}" data-mode="full" data-height="720">
+    <div class="kb-graph__bar">
+      <label class="kb-search">
+        <input type="search" placeholder="搜索标题、标签、摘要…" aria-label="搜索地图节点">
+      </label>
+      <button type="button" class="kb-reset">复位</button>
+    </div>
+    <div class="kb-graph__stage">
+      <canvas role="img" aria-label="知识关系图：节点是笔记与标签，实线是互相引用，虚线是标签归属"></canvas>
+      <div class="kb-tip" hidden></div>
+    </div>
+    <div class="kb-graph__foot">
+      <div class="kb-legend">
+        <span><i class="kb-dot"></i>笔记</span>
+        <span><i class="kb-dot kb-dot--tag"></i>标签</span>
+        <span>实线＝互相引用，虚线＝标签归属</span>
+      </div>
+      <span class="kb-status">正在加载…</span>
+    </div>
+  </div>
+
+  {{- if $notes }}
+  <section class="kb-recent">
+    <h2>最近更新</h2>
+    <ul>
+      {{- range first 6 (sort $notes "Lastmod" "desc") }}
+      <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+      {{- end }}
+    </ul>
+  </section>
+  {{- else }}
+  <p class="kb-empty">还没有笔记。在 <code>content/notes/</code> 下新建 Markdown 文件即可出现在地图上。</p>
+  {{- end }}
+</div>
+{{- end }}

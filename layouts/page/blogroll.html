@@ -1,0 +1,20 @@
+{{ define "main" }}
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">我常看的高质量博客</h1>
+  </header>
+  <div class="post-content">
+    <p>这里收集我日常阅读、质量较高的国内外博客。点击名称跳转，标注 <strong>RSS</strong> 的可直接订阅。</p>
+    <ul class="blogroll">
+      {{ range .Site.Data.blogroll }}
+      <li>
+        <a href="{{ .url }}" target="_blank" rel="noopener">{{ .name }}</a>
+        <span class="blogroll-desc">{{ .description }}</span>
+        <span class="blogroll-cat">[{{ .category }}]</span>
+        {{ if .rss }}<a class="blogroll-rss" href="{{ .rss }}" target="_blank" rel="noopener">RSS</a>{{ end }}
+      </li>
+      {{ end }}
+    </ul>
+  </div>
+</article>
+{{ end }}

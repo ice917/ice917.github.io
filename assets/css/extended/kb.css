@@ -1,0 +1,467 @@
+/* ==========================================================================
+   知识地图 —— 与 PaperMod 双主题共用一套变量
+   PaperMod 会在 html[data-theme="dark"] 上覆写 --theme/--entry/--primary 等，
+   这里只补本项目自己的 --kb-* 变量，两套主题各一份。
+   ========================================================================== */
+
+:root {
+    --kb-note: #2f6fed;
+    --kb-tag: #b4762a;
+    --kb-shadow: 0 1px 2px rgba(0, 0, 0, .05), 0 10px 28px rgba(0, 0, 0, .07);
+    --kb-radius: 14px;
+}
+
+:root[data-theme="dark"] {
+    --kb-note: #6ea8ff;
+    --kb-tag: #e0b062;
+    --kb-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .45);
+}
+
+/* 首页地图需要更宽的画布 */
+.main:has(> .kb-home) {
+    max-width: 1160px;
+}
+
+/* ---------------------------------------------------------------- 首页头部 */
+
+.kb-hero {
+    padding: 6px 0 10px;
+}
+
+.kb-hero h1 {
+    margin: 0 0 10px;
+    font-size: 30px;
+    letter-spacing: -.02em;
+}
+
+.kb-hero p {
+    margin: 0;
+    max-width: 680px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--secondary);
+}
+
+.kb-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--secondary);
+}
+
+.kb-stats b {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- 画布容器 */
+
+.kb-graph {
+    position: relative;
+    margin: 22px 0;
+    overflow: hidden;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--kb-radius);
+}
+
+.kb-graph__bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--theme);
+    border-bottom: 1px solid var(--border);
+}
+
+.kb-search {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.kb-search input {
+    width: 100%;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--primary);
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    outline: none;
+    transition: border-color .15s ease;
+}
+
+.kb-search input::placeholder {
+    color: var(--secondary);
+    opacity: .8;
+}
+
+.kb-search input:focus {
+    border-color: var(--kb-note);
+}
+
+.kb-reset {
+    flex: 0 0 auto;
+    padding: 7px 14px;
+    font-size: 12px;
+    color: var(--secondary);
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.kb-reset:hover {
+    color: var(--kb-note);
+    border-color: var(--kb-note);
+}
+
+.kb-graph__stage {
+    position: relative;
+}
+
+.kb-graph canvas {
+    display: block;
+    width: 100%;
+    cursor: grab;
+    touch-action: none;
+}
+
+.kb-graph__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--secondary);
+    background: var(--theme);
+    border-top: 1px solid var(--border);
+}
+
+.kb-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+}
+
+.kb-legend span {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.kb-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--kb-note);
+}
+
+.kb-dot--tag {
+    background: transparent;
+    border: 2px solid var(--kb-tag);
+    width: 7px;
+    height: 7px;
+}
+
+/* ---------------------------------------------------------------- 悬浮提示 */
+
+.kb-tip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-width: 260px;
+    padding: 9px 11px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--primary);
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--kb-shadow);
+    pointer-events: none;
+}
+
+.kb-tip[hidden] {
+    display: none;
+}
+
+.kb-tip strong {
+    font-size: 13px;
+}
+
+.kb-tip em {
+    font-style: normal;
+    color: var(--secondary);
+}
+
+.kb-tip span {
+    color: var(--secondary);
+}
+
+/* ---------------------------------------------------------------- 笔记卡片墙 */
+
+.kb-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+    gap: 14px;
+    margin: 22px 0;
+}
+
+.kb-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 18px;
+    color: inherit;
+    text-decoration: none;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--kb-radius);
+    transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.kb-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--kb-note);
+    box-shadow: var(--kb-shadow);
+}
+
+.kb-card h2 {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.kb-card p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--secondary);
+}
+
+.kb-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-top: auto;
+    font-size: 11px;
+    color: var(--secondary);
+}
+
+.kb-chip {
+    padding: 2px 9px;
+    color: var(--secondary);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+.kb-chip:hover {
+    color: var(--kb-note);
+    border-color: var(--kb-note);
+}
+
+/* ---------------------------------------------------------------- 笔记页邻域图 */
+
+.kb-neighbors {
+    margin: 34px 0 10px;
+}
+
+.kb-neighbors h2 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--secondary);
+}
+
+.kb-neighbors .kb-graph {
+    margin-top: 10px;
+}
+
+/* ---------------------------------------------------------------- 首页最近更新 */
+
+.kb-recent {
+    margin: 26px 0 10px;
+}
+
+.kb-recent h2 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--secondary);
+}
+
+.kb-recent ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kb-recent li {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.kb-recent a {
+    text-decoration: none;
+}
+
+.kb-recent a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.kb-empty {
+    margin: 18px 0;
+    font-size: 14px;
+    color: var(--secondary);
+}
+
+/* ---------------------------------------------------------------- 数学公式 */
+
+/* Hugo 在构建期把 $$...$$ 转成 MathML，包在 span.katex 里。
+   块级公式的 span 与 <p> 是兄弟节点，所以这里只负责居中与留白；
+   行内公式（math 上没有 display="block"）保持原样，不受影响。 */
+.post-content .katex:has(math[display="block"]) {
+    display: block;
+    margin: 18px 0;
+    text-align: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.post-content math {
+    font-size: 1.05em;
+}
+
+/* ---------------------------------------------------------------- 阅读历史 */
+
+.kb-history-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 22px 0 6px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.kb-history-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--secondary);
+}
+
+.kb-history-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.kb-history-chip--total {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.kb-history-clear {
+    padding: 5px 12px;
+    font-size: 13px;
+    color: var(--secondary);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.kb-history-clear:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.kb-history-items {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: kb-history;
+}
+
+.kb-history-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.kb-history-item a {
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.kb-history-item a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.kb-history-meta {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--secondary);
+    white-space: nowrap;
+}
+
+.kb-history-section {
+    padding: 1px 7px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+.kb-history-times {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.kb-history-empty {
+    margin: 18px 0;
+    font-size: 14px;
+    color: var(--secondary);
+}
+
+@media (max-width: 640px) {
+    .kb-hero h1 {
+        font-size: 24px;
+    }
+
+    .kb-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .kb-graph__foot {
+        justify-content: flex-start;
+    }
+}
