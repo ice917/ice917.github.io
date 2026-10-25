@@ -1,54 +1,74 @@
+{{- /* 书架：站点最外层。一个顶级 section 就是一本书，点封面进入书页面。 */ -}}
 {{- define "main" }}
-{{- $notes := where site.RegularPages "Section" "notes" -}}
-{{- $tags := slice -}}
-{{- range $notes -}}
-{{- range .Params.tags -}}{{- $tags = $tags | append . -}}{{- end -}}
+{{- $books := sort site.Sections "Weight" "asc" -}}
+{{- $entries := where site.RegularPages "Section" "!=" "" -}}
+{{- $domains := slice -}}
+{{- range $books -}}
+  {{- $domains = $domains | append (.Params.domain | default "未分类") -}}
 {{- end -}}
-{{- $tags = uniq $tags -}}
-<div class="kb-home">
+{{- $domains = $domains | uniq | sort -}}
+{{- $palette := slice "#2f6fed" "#2f8f6f" "#8b5cf6" "#b4762a" "#c2410c" "#0e7490" -}}
+<div class="kb-shelf-page">
   <section class="kb-hero">
     <h1>{{ site.Title }}</h1>
     <p>{{ site.Params.description }}</p>
     <div class="kb-stats">
-      <span><b>{{ len $notes }}</b> 篇笔记</span>
-      <span><b>{{ len $tags }}</b> 个标签</span>
-      <span><b>{{ len site.RegularPages }}</b> 个知识条目</span>
+      <span><b>{{ len $books }}</b> 本书</span>
+      <span><b>{{ len $entries }}</b> 篇笔记</span>
+      <span><b>{{ len $domains }}</b> 个领域</span>
     </div>
   </section>
 
-  <div class="kb-graph" data-graph="{{ "graph.json" | relURL }}" data-mode="full" data-height="720">
-    <div class="kb-graph__bar">
-      <label class="kb-search">
-        <input type="search" placeholder="搜索标题、标签、摘要…" aria-label="搜索地图节点">
-      </label>
-      <button type="button" class="kb-reset">复位</button>
-      <button type="button" class="kb-lock" aria-pressed="false" title="锁定后可用手指拖动地图；解锁后页面可正常上下滑动">锁定地图</button>
-    </div>
-    <div class="kb-graph__stage">
-      <canvas role="img" aria-label="知识关系图：节点是笔记与标签，实线是互相引用，虚线是标签归属"></canvas>
-      <div class="kb-tip" hidden></div>
-    </div>
-    <div class="kb-graph__foot">
-      <div class="kb-legend">
-        <span><i class="kb-dot"></i>笔记</span>
-        <span><i class="kb-dot kb-dot--tag"></i>标签</span>
-        <span>实线＝互相引用，虚线＝标签归属</span>
-      </div>
-      <span class="kb-status">正在加载…</span>
-    </div>
+  {{- if $books }}
+  {{- if gt (len $domains) 1 }}
+  <div class="kb-filter" role="group" aria-label="按领域筛选书籍">
+    <button type="button" class="kb-filter__chip is-on" data-domain="*" aria-pressed="true">全部</button>
+    {{- range $domains }}
+    <button type="button" class="kb-filter__chip" data-domain="{{ . }}" aria-pressed="false">{{ . }}</button>
+    {{- end }}
   </div>
+  {{- end }}
 
-  {{- if $notes }}
+  <p class="kb-shelf__hint">点开封面进入一本书。每本书有自己的地图、笔记与标签。</p>
+
+  <div class="kb-shelf" data-shelf>
+    {{- range $i, $b := $books }}
+    {{- $domain := $b.Params.domain | default "未分类" -}}
+    {{- $accent := $b.Params.accent | default (index $palette (mod $i (len $palette))) -}}
+    <a class="kb-book" href="{{ $b.RelPermalink }}" data-domain="{{ $domain }}" style="--book-accent: {{ $accent }};">
+      <span class="kb-book__cover">
+        <span class="kb-book__spine" aria-hidden="true"></span>
+        <span class="kb-book__face">
+          <span class="kb-book__domain">{{ $domain }}</span>
+          <span class="kb-book__title">{{ $b.Title }}</span>
+          <span class="kb-book__line" aria-hidden="true"></span>
+          <span class="kb-book__author">{{ $b.Params.author | default site.Params.author }}</span>
+        </span>
+      </span>
+      <span class="kb-book__meta">
+        <span class="kb-book__name">{{ $b.Title }}</span>
+        <span class="kb-book__count">{{ len $b.RegularPages }} 篇</span>
+      </span>
+    </a>
+    {{- end }}
+  </div>
+  {{- else }}
+  <p class="kb-empty">书架还是空的。在 <code>content/</code> 下新建一个目录并放入 <code>_index.md</code>，它就是一本新书。</p>
+  {{- end }}
+
+  {{- $recent := first 6 (sort $entries "Lastmod" "desc") -}}
+  {{- if $recent }}
   <section class="kb-recent">
     <h2>最近更新</h2>
     <ul>
-      {{- range first 6 (sort $notes "Lastmod" "desc") }}
-      <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+      {{- range $recent }}
+      <li>
+        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+        <span class="kb-recent__book">{{ .CurrentSection.Title }}</span>
+      </li>
       {{- end }}
     </ul>
   </section>
-  {{- else }}
-  <p class="kb-empty">还没有笔记。在 <code>content/notes/</code> 下新建 Markdown 文件即可出现在地图上。</p>
   {{- end }}
 </div>
 {{- end }}

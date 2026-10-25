@@ -1,11 +1,15 @@
 {{- /*
-  知识地图的图数据。
-  节点 = 笔记（content/notes/*.md） + 标签枢纽
+  一本书（一个顶级 section）的知识地图数据。
+  节点 = 本书笔记 + 标签枢纽
   边   = 笔记→标签（front matter 里的 tags）
-        笔记→笔记（正文里的 /notes/<slug>/ 链接）
-  单一事实源：这里不写死任何关系，全部从内容文件推导。
+        笔记→笔记（正文里指向本书其他笔记的 /<section>/<slug>/ 链接）
+  单一事实源：不写死任何关系，全部从内容文件推导。
+  跨书的链接目标不在本书节点里，前端会自动丢弃这类边。
 */ -}}
-{{- $pages := where site.RegularPages "Section" "notes" -}}
+{{- $pages := .RegularPages -}}
+{{- $section := .Section -}}
+{{- $prefix := printf "/%s/" $section -}}
+{{- $linkPattern := printf `/%s/[A-Za-z0-9_\-]+` $section -}}
 {{- $nodes := slice -}}
 {{- $links := slice -}}
 
@@ -58,9 +62,9 @@
     ) -}}
   {{- end -}}
 
-  {{- /* 正文互链边：识别 /notes/<slug>/ 形式 */ -}}
-  {{- range findRE `/notes/[A-Za-z0-9_\-]+` .RawContent -}}
-    {{- $target := . | replaceRE `^/notes/` "" | replaceRE `\.md$` "" -}}
+  {{- /* 正文互链边：识别本书里的 /<section>/<slug> 形式 */ -}}
+  {{- range findRE $linkPattern .RawContent -}}
+    {{- $target := . | replaceRE $prefix "" | replaceRE `\.md$` "" -}}
     {{- if ne $target $slug -}}
       {{- $links = $links | append (dict
           "source" $slug

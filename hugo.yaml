@@ -53,8 +53,8 @@ params:
 # 菜单配置
 menu:
   main:
-    - identifier: map
-      name: 地图
+    - identifier: shelf
+      name: 书架
       url: /
       weight: 10
     - identifier: notes
@@ -105,9 +105,14 @@ outputFormats:
     notAlternative: true
 
 # 输出格式
+# 每本书是 content/ 下的一个顶级 section，各自生成 <book>/graph.json，
+# 因此 Graph 挂在 section 上，而不是站点首页。
 outputs:
   home:
     - HTML
     - RSS
     - JSON
+  section:
+    - HTML
+    - RSS
     - Graph

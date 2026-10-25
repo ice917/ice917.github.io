@@ -17,8 +17,10 @@
     --kb-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .45);
 }
 
-/* 首页地图需要更宽的画布 */
-.main:has(> .kb-home) {
+/* 书架、书页面与全图都需要更宽的画布 */
+.main:has(> .kb-home),
+.main:has(> .kb-shelf-page),
+.main:has(> .kb-book-page) {
     max-width: 1160px;
 }
 
@@ -269,7 +271,8 @@
     box-shadow: var(--kb-shadow);
 }
 
-.kb-card h2 {
+.kb-card h2,
+.kb-card h3 {
     margin: 0;
     font-size: 15px;
     line-height: 1.45;
@@ -483,6 +486,240 @@
     color: var(--secondary);
 }
 
+/* ---------------------------------------------------------------- 书架 */
+
+.kb-shelf__hint {
+    margin: 18px 0 0;
+    font-size: 12px;
+    color: var(--secondary);
+}
+
+.kb-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.kb-filter__chip {
+    padding: 5px 13px;
+    font-size: 12px;
+    color: var(--secondary);
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.kb-filter__chip:hover {
+    color: var(--kb-note);
+    border-color: var(--kb-note);
+}
+
+.kb-filter__chip.is-on {
+    color: var(--kb-note);
+    font-weight: 600;
+    background: transparent;
+    border-color: var(--kb-note);
+}
+
+.kb-shelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
+    gap: 22px;
+    margin: 20px 0 10px;
+}
+
+.kb-book {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* [hidden] 的 UA 样式会被上面的 display:flex 盖掉，这里补回来 */
+.kb-book[hidden] {
+    display: none;
+}
+
+.kb-book__cover {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    background:
+        linear-gradient(155deg, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, 0) 44%),
+        linear-gradient(200deg, rgba(0, 0, 0, .04), rgba(0, 0, 0, .34)),
+        var(--book-accent, var(--kb-note));
+    border-radius: 3px 9px 9px 3px;
+    box-shadow: 0 12px 24px -14px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .14);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+/* 书脊 */
+.kb-book__spine {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 13px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, .4), rgba(0, 0, 0, .06) 72%, rgba(255, 255, 255, .16));
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .2);
+}
+
+/* 右侧切口，暗示这是可以翻开的纸页 */
+.kb-book__cover::after {
+    content: "";
+    position: absolute;
+    inset: 5px 3px 5px auto;
+    width: 3px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .18));
+    border-radius: 2px;
+}
+
+.kb-book__face {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 18px 16px 16px 25px;
+    box-sizing: border-box;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+}
+
+.kb-book__domain {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    opacity: .82;
+}
+
+.kb-book__title {
+    margin-top: auto;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.32;
+    letter-spacing: -.01em;
+    word-break: break-word;
+}
+
+.kb-book__line {
+    width: 26px;
+    height: 2px;
+    margin: 10px 0 8px;
+    background: rgba(255, 255, 255, .7);
+}
+
+.kb-book__author {
+    font-size: 11px;
+    opacity: .82;
+}
+
+.kb-book__meta {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--secondary);
+}
+
+.kb-book__name {
+    overflow: hidden;
+    font-weight: 600;
+    color: var(--primary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color .15s ease;
+}
+
+.kb-book__count {
+    flex: 0 0 auto;
+}
+
+.kb-book:hover .kb-book__cover,
+.kb-book:focus-visible .kb-book__cover {
+    transform: translateY(-4px) rotate(-.7deg);
+    box-shadow: 0 20px 32px -16px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 255, 255, .2);
+}
+
+.kb-book:hover .kb-book__name {
+    color: var(--kb-note);
+}
+
+.kb-book:focus-visible {
+    outline: none;
+}
+
+.kb-book:focus-visible .kb-book__cover {
+    outline: 2px solid var(--kb-note);
+    outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------- 书页面 */
+
+.kb-hero .kb-crumb {
+    margin: 0 0 10px;
+    max-width: none;
+    font-size: 12px;
+    color: var(--secondary);
+}
+
+.kb-crumb a {
+    color: var(--secondary);
+    text-decoration: none;
+}
+
+.kb-crumb a:hover {
+    color: var(--kb-note);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.kb-crumb__sep {
+    margin: 0 6px;
+    opacity: .6;
+}
+
+.kb-stats .kb-domain {
+    padding: 1px 9px;
+    color: var(--kb-note);
+    border: 1px solid var(--kb-note);
+    border-radius: 999px;
+}
+
+.kb-book__intro {
+    margin: 20px 0 6px;
+}
+
+.kb-book__notes {
+    margin: 26px 0 10px;
+}
+
+.kb-book__notes h2 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--secondary);
+}
+
+.kb-recent li {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.kb-recent__book {
+    flex: 0 0 auto;
+    padding: 1px 8px;
+    font-size: 11px;
+    color: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
 @media (max-width: 640px) {
     .kb-hero h1 {
         font-size: 24px;
@@ -494,5 +731,26 @@
 
     .kb-graph__foot {
         justify-content: flex-start;
+    }
+
+    .kb-shelf {
+        grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+        gap: 14px;
+    }
+
+    .kb-book__spine {
+        width: 10px;
+    }
+
+    .kb-book__face {
+        padding: 12px 10px 12px 20px;
+    }
+
+    .kb-book__title {
+        font-size: 15px;
+    }
+
+    .kb-book__domain {
+        letter-spacing: .08em;
     }
 }
