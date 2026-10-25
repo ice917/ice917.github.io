@@ -69,9 +69,9 @@
         {{- $icon = printf "https://%s/favicon.ico" $host -}}
       {{- end }}
       <li>
-        <a class="kb-partner" href="{{ .url }}" target="_blank" rel="noopener"{{ with .note }} title="{{ . }}"{{ end }}>
+        <a class="kb-partner" href="{{ .url }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"{{ with .note }} title="{{ . }}"{{ end }}>
           <span class="kb-partner__logo">
-            <img src="{{ $icon }}" alt="" width="18" height="18" loading="lazy" decoding="async" onerror="this.remove()">
+            <img src="{{ $icon }}" alt="" width="18" height="18" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">
             <svg class="kb-partner__fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"/></svg>
           </span>
           <span class="kb-partner__name">{{ .name }}</span>
