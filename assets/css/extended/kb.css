@@ -103,7 +103,8 @@
     border-color: var(--kb-note);
 }
 
-.kb-reset {
+.kb-reset,
+.kb-lock {
     flex: 0 0 auto;
     padding: 7px 14px;
     font-size: 12px;
@@ -115,7 +116,24 @@
     transition: color .15s ease, border-color .15s ease;
 }
 
-.kb-reset:hover {
+.kb-reset:hover,
+.kb-lock:hover {
+    color: var(--kb-note);
+    border-color: var(--kb-note);
+}
+
+/* 鼠标没有滚动冲突，锁定开关只在触摸设备上提供 */
+.kb-lock {
+    display: none;
+}
+
+@media (pointer: coarse) {
+    .kb-lock {
+        display: inline-block;
+    }
+}
+
+.kb-lock[aria-pressed="true"] {
     color: var(--kb-note);
     border-color: var(--kb-note);
 }
@@ -128,7 +146,20 @@
     display: block;
     width: 100%;
     cursor: grab;
+    /* 默认解锁：触摸手势交还浏览器，手机上可以正常上下滑动页面。
+       锁定后改由 kb-graph.js 接管，touch-action 变为 none。 */
+    touch-action: auto;
+}
+
+.kb-graph[data-lock="on"] canvas {
     touch-action: none;
+}
+
+/* 触摸设备未锁定时画布不响应拖动，用默认指针暗示 */
+@media (pointer: coarse) {
+    .kb-graph[data-lock="off"] canvas {
+        cursor: default;
+    }
 }
 
 .kb-graph__foot {

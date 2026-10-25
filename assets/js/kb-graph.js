@@ -53,6 +53,19 @@
     this.tip = root.querySelector('.kb-tip');
     this.status = root.querySelector('.kb-status');
     this.input = root.querySelector('.kb-search input');
+    this.lockBtn = root.querySelector('.kb-lock');
+
+    /* 触摸设备上，地图默认把竖向滑动让给页面滚动；用户手动锁定后才接管手势。
+       状态跨页面保持，避免每次进入都要重新点一次。 */
+    this.locked = false;
+    try {
+      this.locked = window.localStorage.getItem('kb-graph-lock') === '1';
+    } catch (err) { /* 隐私模式等场景忽略存储失败 */ }
+    root.dataset.lock = this.locked ? 'on' : 'off';
+    if (this.lockBtn) {
+      this.lockBtn.setAttribute('aria-pressed', this.locked ? 'true' : 'false');
+      this.lockBtn.textContent = this.locked ? '解锁滚动' : '锁定地图';
+    }
 
     this.mode = root.dataset.mode === 'focus' ? 'focus' : 'full';
     this.focusId = root.dataset.focus || '';
@@ -504,11 +517,47 @@
     this.draw();
   };
 
+  /* 锁定＝由脚本接管触摸手势（可平移/缩放/拖节点）；
+     解锁＝手势全部交还浏览器，页面可以正常上下滑动。 */
+  Graph.prototype.setLock = function (on) {
+    this.locked = !!on;
+    this.root.dataset.lock = this.locked ? 'on' : 'off';
+    if (this.lockBtn) {
+      this.lockBtn.setAttribute('aria-pressed', this.locked ? 'true' : 'false');
+      this.lockBtn.textContent = this.locked ? '解锁滚动' : '锁定地图';
+    }
+    if (!this.locked) {
+      /* 解锁时清干净进行中的交互，避免残留状态卡住画布 */
+      if (this.drag) { this.drag.fixed = false; this.drag = null; }
+      this.pan = null;
+      this.down = null;
+      this.pinch = null;
+      this.pointers.clear();
+      this.hover = null;
+      if (this.tip) this.tip.hidden = true;
+      this.canvas.style.cursor = '';
+      this.draw();
+    }
+    try {
+      window.localStorage.setItem('kb-graph-lock', this.locked ? '1' : '0');
+    } catch (err) { /* 忽略存储失败 */ }
+  };
+
   Graph.prototype.bind = function () {
     var self = this;
     var cv = this.canvas;
 
     cv.addEventListener('pointerdown', function (e) {
+      var isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
+      var p = self.localPoint(e);
+
+      if (isTouch && !self.locked) {
+        /* 未锁定：不捕获指针、不接管手势，竖向滑动完全交给浏览器。
+           只记下起点，pointerup 时用位移判断是轻点还是滑动。 */
+        self.down = { x: p.x, y: p.y, moved: 0, hit: self.hitTest(p.x, p.y) };
+        return;
+      }
+
       cv.setPointerCapture(e.pointerId);
       self.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
@@ -524,7 +573,6 @@
         return;
       }
 
-      var p = self.localPoint(e);
       var hit = self.hitTest(p.x, p.y);
       self.down = { x: p.x, y: p.y, moved: 0, hit: hit };
       if (hit) {
@@ -537,6 +585,17 @@
     });
 
     cv.addEventListener('pointermove', function (e) {
+      var isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
+
+      if (isTouch && !self.locked) {
+        /* 未锁定：只在拖动过程中累计位移，用于区分轻点与滑动 */
+        if (self.down) {
+          var pc = self.localPoint(e);
+          self.down.moved = Math.max(self.down.moved, Math.hypot(pc.x - self.down.x, pc.y - self.down.y));
+        }
+        return;
+      }
+
       if (self.pointers.has(e.pointerId)) {
         self.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       }
@@ -575,7 +634,7 @@
       var hit = self.hitTest(p.x, p.y);
       if (hit !== self.hover) {
         self.hover = hit;
-        cv.style.cursor = hit ? 'pointer' : 'grab';
+        cv.style.cursor = hit ? 'pointer' : '';
         self.draw();
       }
       self.showTip(hit, p);
@@ -588,7 +647,7 @@
       if (self.drag) { self.drag.fixed = false; self.drag = null; }
       self.pan = null;
       self.down = null;
-      cv.style.cursor = 'grab';
+      cv.style.cursor = '';
       if (self.hover) self.showTip(self.hover, self.localPoint(e));
       else if (self.tip) self.tip.hidden = true;
       if (url) window.location.href = url;
@@ -600,6 +659,7 @@
       self.down = null;
       self.pointers.delete(e.pointerId);
       self.pinch = null;
+      cv.style.cursor = '';
     });
 
     cv.addEventListener('pointerleave', function () {
@@ -631,6 +691,12 @@
         self.relax(320);
         self.fitView();
         self.draw();
+      });
+    }
+
+    if (this.lockBtn) {
+      this.lockBtn.addEventListener('click', function () {
+        self.setLock(!self.locked);
       });
     }
 
