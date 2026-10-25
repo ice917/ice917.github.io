@@ -12,6 +12,8 @@
   'use strict';
 
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* px：手指位移超过此值才判定为"拖动地图"，否则视为点击或页面滚动的开始 */
+  var TOUCH_SLOP = 8;
   var cache = Object.create(null);
 
   function cssVar(name, fallback) {
@@ -68,6 +70,7 @@
     this.drag = null;
     this.pan = null;
     this.down = null;
+    this.pending = null;
     this.pointers = new Map();
     this.pinch = null;
     this.query = '';
@@ -520,13 +523,23 @@
         };
         self.drag = null;
         self.pan = null;
+        self.pending = null;
         self.down = null;
         return;
       }
 
       var p = self.localPoint(e);
       var hit = self.hitTest(p.x, p.y);
+      var isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
       self.down = { x: p.x, y: p.y, moved: 0, hit: hit };
+      if (isTouch) {
+        /* 触屏先挂起：等 pointermove 判断是纵向为主（交还页面滚动）
+           还是横向为主（才接管为地图平移或节点拖拽）。 */
+        self.pending = { x: p.x, y: p.y, hit: hit };
+        self.drag = null;
+        self.pan = null;
+        return;
+      }
       if (hit) {
         self.drag = hit;
         hit.fixed = true;
@@ -555,8 +568,38 @@
       }
 
       var p = self.localPoint(e);
+      var isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
+
       if (self.down) {
         self.down.moved = Math.max(self.down.moved, Math.hypot(p.x - self.down.x, p.y - self.down.y));
+      }
+
+      /* 触屏待定态：先判方向，再决定谁处理这次手势 */
+      if (isTouch && self.pending) {
+        var adx = Math.abs(p.x - self.pending.x);
+        var ady = Math.abs(p.y - self.pending.y);
+        if (Math.max(adx, ady) < TOUCH_SLOP) return;
+
+        var act = self.pending;
+        self.pending = null;
+
+        if (ady >= adx) {
+          /* 竖向为主：交还浏览器滚动页面，本次手势彻底放弃地图操作 */
+          self.down = null;
+          return;
+        }
+
+        if (act.hit) {
+          self.drag = act.hit;
+          act.hit.fixed = true;
+          self.drag.x = (p.x - self.view.x) / self.view.k;
+          self.drag.y = (p.y - self.view.y) / self.view.k;
+          self.kick();
+        } else {
+          /* 以激活点为锚，避免阈值那段距离让画面跳一下 */
+          self.pan = { x: p.x, y: p.y, ox: self.view.x, oy: self.view.y };
+        }
+        return;
       }
 
       if (self.drag) {
@@ -572,6 +615,8 @@
         return;
       }
 
+      if (isTouch) return;   /* 触屏没有悬停语义，避免滑动时弹提示 */
+
       var hit = self.hitTest(p.x, p.y);
       if (hit !== self.hover) {
         self.hover = hit;
@@ -582,7 +627,10 @@
     });
 
     cv.addEventListener('pointerup', function (e) {
-      var url = (self.down && self.down.moved < 5 && self.down.hit) ? self.down.hit.url : '';
+      var isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
+      var tol = isTouch ? TOUCH_SLOP : 5;
+      var url = (self.down && self.down.moved < tol && self.down.hit) ? self.down.hit.url : '';
+      self.pending = null;
       self.pointers.delete(e.pointerId);
       if (self.pointers.size < 2) self.pinch = null;
       if (self.drag) { self.drag.fixed = false; self.drag = null; }
@@ -597,9 +645,11 @@
     cv.addEventListener('pointercancel', function (e) {
       if (self.drag) { self.drag.fixed = false; self.drag = null; }
       self.pan = null;
+      self.pending = null;
       self.down = null;
       self.pointers.delete(e.pointerId);
       self.pinch = null;
+      cv.style.cursor = 'grab';
     });
 
     cv.addEventListener('pointerleave', function () {

@@ -128,7 +128,10 @@
     display: block;
     width: 100%;
     cursor: grab;
-    touch-action: none;
+    /* 单指垂直手势交还浏览器用于页面滚动，水平手势留给地图平移。
+       pan-y 不包含 pinch-zoom，双指捏合仍由 kb-graph.js 处理，
+       因此不会触发整页缩放。 */
+    touch-action: pan-y;
 }
 
 .kb-graph__foot {
