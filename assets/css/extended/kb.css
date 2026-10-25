@@ -9,12 +9,17 @@
     --kb-tag: #b4762a;
     --kb-shadow: 0 1px 2px rgba(0, 0, 0, .05), 0 10px 28px rgba(0, 0, 0, .07);
     --kb-radius: 14px;
+    /* 书封缩略图当作纸页：浅色主题是白纸，深色主题是略亮于背景的深灰纸 */
+    --kb-paper: #fff;
+    --kb-paper-ink: rgba(0, 0, 0, .13);
 }
 
 :root[data-theme="dark"] {
     --kb-note: #6ea8ff;
     --kb-tag: #e0b062;
     --kb-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .45);
+    --kb-paper: #26272c;
+    --kb-paper-ink: rgba(255, 255, 255, .13);
 }
 
 /* 书架、书页面与全图都需要更宽的画布 */
@@ -516,51 +521,11 @@ body:has(.kb-shelf-page) .main {
     outline-offset: 2px;
 }
 
-/* 书封下方：可滑动的提示与左右按钮，只有溢出时才出现 */
-.kb-shelf-foot {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: center;
-    margin: 4px 0 0;
-    font-size: 12px;
-    color: var(--secondary);
-}
-
-/* [hidden] 的 UA 样式会被上面的 display:flex 盖掉，这里补回来 */
-.kb-shelf-foot[hidden] {
-    display: none;
-}
-
-.kb-shelf-foot button {
-    width: 26px;
-    height: 26px;
-    padding: 0;
-    font-size: 16px;
-    line-height: 1;
-    color: var(--secondary);
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: color .15s ease, border-color .15s ease;
-}
-
-.kb-shelf-foot button:hover {
-    color: var(--kb-note);
-    border-color: var(--kb-note);
-}
-
-.kb-shelf-foot button:focus-visible {
-    outline: 2px solid var(--kb-note);
-    outline-offset: 2px;
-}
-
 .kb-filter {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 18px;
+    margin: 0;
 }
 
 .kb-filter__chip {
@@ -586,52 +551,80 @@ body:has(.kb-shelf-page) .main {
     border-color: var(--kb-note);
 }
 
-/* 一排书封，横向滑动，像真的书架 */
-.kb-shelf-wrap {
-    position: relative;
-    /* 书少时收窄到内容宽度并居中，搁板就不会长得没边；书多时被 max-width 截住并横向滚动 */
-    width: fit-content;
-    max-width: 100%;
-    margin: 26px auto 0;
-}
-
-.kb-shelf {
+/* ---------------------------------------------------------- 书架两栏布局 */
+.kb-shelf-body {
     display: flex;
-    gap: 20px;
-    padding: 6px 2px 14px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
+    gap: 30px;
+    align-items: flex-start;
+    margin-top: 24px;
 }
 
-.kb-shelf.is-centered {
-    justify-content: center;
+.kb-shelf-main {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
-.kb-shelf::-webkit-scrollbar {
-    display: none;
+/* 工具栏：书名搜索 + 领域筛选 */
+.kb-shelf-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-/* 搁板：书封立在上面，不随横向滚动移动 */
-.kb-shelf__plank {
+.kb-shelf-search {
+    position: relative;
+    display: flex;
+    flex: 1 1 190px;
+    max-width: 360px;
+    align-items: center;
+    min-width: 0;
+}
+
+.kb-shelf-search__icon {
     position: absolute;
-    bottom: 4px;
-    left: 2px;
-    right: 2px;
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
+    left: 12px;
+    width: 14px;
+    height: 14px;
+    color: var(--secondary);
     pointer-events: none;
 }
 
+.kb-shelf-search input {
+    width: 100%;
+    height: 34px;
+    padding: 0 12px 0 32px;
+    font-size: 13px;
+    color: var(--primary);
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    outline: none;
+    transition: border-color .15s ease;
+}
+
+.kb-shelf-search input::placeholder {
+    color: var(--secondary);
+    opacity: .85;
+}
+
+.kb-shelf-search input:focus {
+    border-color: var(--kb-note);
+}
+
+/* PDF 缩略图式网格：等宽纸页，一行一行往下排 */
+.kb-shelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(146px, 1fr));
+    gap: 24px 18px;
+}
+
 .kb-book {
-    flex: 0 0 152px;
     display: flex;
     flex-direction: column;
     gap: 9px;
-    scroll-snap-align: start;
+    min-width: 0;
     color: inherit;
     text-decoration: none;
 }
@@ -641,81 +634,121 @@ body:has(.kb-shelf-page) .main {
     display: none;
 }
 
+/* 一张白纸：顶部色条代替书脊，用来标记领域 */
 .kb-book__cover {
     position: relative;
-    display: block;
-    overflow: hidden;
-    aspect-ratio: 5 / 9;
-    background:
-        linear-gradient(155deg, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, 0) 44%),
-        linear-gradient(200deg, rgba(0, 0, 0, .04), rgba(0, 0, 0, .34)),
-        var(--book-accent, var(--kb-note));
-    border-radius: 3px 9px 9px 3px;
-    box-shadow: 0 12px 24px -14px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .14);
-    transition: transform .2s ease, box-shadow .2s ease;
-}
-
-/* 书脊 */
-.kb-book__spine {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 13px;
-    background: linear-gradient(90deg, rgba(0, 0, 0, .4), rgba(0, 0, 0, .06) 72%, rgba(255, 255, 255, .16));
-    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .2);
-}
-
-/* 右侧切口，暗示这是可以翻开的纸页 */
-.kb-book__cover::after {
-    content: "";
-    position: absolute;
-    inset: 5px 3px 5px auto;
-    width: 3px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .18));
-    border-radius: 2px;
-}
-
-.kb-book__face {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    padding: 18px 16px 16px 25px;
-    box-sizing: border-box;
-    color: #fff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+    aspect-ratio: 3 / 4;
+    padding: 11px 12px 12px;
+    overflow: hidden;
+    background: var(--kb-paper);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--book-accent, var(--kb-note));
+    border-radius: 5px;
+    box-shadow: 0 10px 20px -18px rgba(0, 0, 0, .6);
+    transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
 }
 
 .kb-book__domain {
-    font-size: 10px;
+    overflow: hidden;
+    font-size: 9px;
     font-weight: 600;
-    letter-spacing: .14em;
-    opacity: .82;
+    line-height: 1.4;
+    letter-spacing: .12em;
+    color: var(--secondary);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* 纸上的假文字行，纯视觉，不进读屏 */
+.kb-book__lines {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 15px;
+}
+
+.kb-book__lines i {
+    height: 4px;
+    background: var(--kb-paper-ink);
+    border-radius: 2px;
+}
+
+.kb-book__lines i:nth-child(1) {
+    width: 100%;
+}
+
+.kb-book__lines i:nth-child(2) {
+    width: 92%;
+}
+
+.kb-book__lines i:nth-child(3) {
+    width: 96%;
+}
+
+.kb-book__lines i:nth-child(4) {
+    width: 74%;
+}
+
+.kb-book__lines i:nth-child(5) {
+    width: 88%;
+}
+
+.kb-book__lines i:nth-child(6) {
+    width: 62%;
+}
+
+.kb-book__lines i:nth-child(7) {
+    width: 94%;
+}
+
+.kb-book__lines i:nth-child(8) {
+    width: 80%;
+}
+
+.kb-book__lines i:nth-child(9) {
+    width: 54%;
+}
+
+.kb-book__lines i:nth-child(10) {
+    width: 34%;
+}
+
+/* 文件名一样：缩略图下方居中，最多两行 */
+.kb-book__name {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: center;
 }
 
 .kb-book__title {
-    margin-top: auto;
-    font-size: 19px;
-    font-weight: 700;
-    line-height: 1.32;
-    letter-spacing: -.01em;
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
     word-break: break-word;
-}
-
-.kb-book__line {
-    width: 26px;
-    height: 2px;
-    margin: 10px 0 8px;
-    background: rgba(255, 255, 255, .7);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 .kb-book__author {
+    overflow: hidden;
     font-size: 11px;
-    opacity: .82;
+    line-height: 1.4;
+    color: var(--secondary);
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .kb-book:hover .kb-book__cover,
 .kb-book:focus-visible .kb-book__cover {
-    transform: translateY(-4px) rotate(-.7deg);
-    box-shadow: 0 20px 32px -16px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 255, 255, .2);
+    transform: translateY(-3px);
+    border-color: var(--book-accent, var(--kb-note));
+    box-shadow: 0 16px 26px -20px rgba(0, 0, 0, .7);
 }
 
 .kb-book:focus-visible {
@@ -727,28 +760,122 @@ body:has(.kb-shelf-page) .main {
     outline-offset: 3px;
 }
 
-/* 书架底部：合作伙伴与留言，所有访客可见（静态页面，无需登录） */
+.kb-shelf-none {
+    margin: 26px 0;
+    font-size: 13px;
+    color: var(--secondary);
+    text-align: center;
+}
+
+/* ---------------------------------------------------------- 右侧栏 */
+.kb-side {
+    position: sticky;
+    top: 18px;
+    display: flex;
+    flex: 0 0 336px;
+    flex-direction: column;
+    align-self: flex-start;
+    min-height: 0;
+    max-height: calc(100vh - 36px);
+}
+
+.kb-side__toggle {
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 4px;
+    align-items: center;
+    align-self: flex-end;
+    height: 26px;
+    margin: 0 0 8px;
+    padding: 0 10px;
+    font-size: 11px;
+    color: var(--secondary);
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.kb-side__toggle:hover {
+    color: var(--kb-note);
+    border-color: var(--kb-note);
+}
+
+.kb-side__toggle:focus-visible {
+    outline: 2px solid var(--kb-note);
+    outline-offset: 2px;
+}
+
+.kb-side__toggle-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.kb-side__body {
+    min-height: 0;
+    padding-right: 2px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+/* 收起态：只留一条竖着的按钮 */
+.kb-side.is-collapsed {
+    flex-basis: 40px;
+    max-height: none;
+    overflow: hidden;
+}
+
+/* 收起时内容不可见也不可点，但仍按原宽度留在文档里。
+   utterances 的 iframe 一旦被压成 0 宽，会按 0 宽算出巨大的高度，
+   展开后不会自己重算，所以这里不能让它塌掉。 */
+.kb-side.is-collapsed .kb-side__body {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 336px;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.kb-side.is-collapsed .kb-side__toggle {
+    align-self: stretch;
+    justify-content: center;
+    height: 112px;
+    padding: 0;
+    font-size: 12px;
+}
+
+.kb-side.is-collapsed .kb-side__toggle-text {
+    display: none;
+}
+
+/* 侧栏里的合作伙伴与留言，所有访客可见（静态页面，无需登录） */
 .kb-partners,
 .kb-guestbook {
-    max-width: 720px;
-    margin: 64px auto 0;
+    margin: 0 0 24px;
+}
+
+.kb-guestbook {
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
 }
 
 .kb-partners h2,
 .kb-guestbook h2 {
     margin: 0 0 12px;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: .08em;
+    letter-spacing: .1em;
     color: var(--secondary);
-    text-align: center;
 }
 
 .kb-partners__list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
+    gap: 8px;
+    justify-content: flex-start;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -758,15 +885,23 @@ body:has(.kb-shelf-page) .main {
     display: inline-flex;
     gap: 8px;
     align-items: center;
-    height: 38px;
-    padding: 0 13px 0 9px;
-    font-size: 13px;
+    max-width: 100%;
+    height: 34px;
+    padding: 0 12px 0 8px;
+    font-size: 12px;
     color: var(--primary);
     text-decoration: none;
     background: var(--entry);
     border: 1px solid var(--border);
     border-radius: 10px;
     transition: color .15s ease, border-color .15s ease;
+}
+
+/* 名字太长就截断，别把侧栏撑破 */
+.kb-partner__name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .kb-partner:hover {
@@ -810,21 +945,19 @@ body:has(.kb-shelf-page) .main {
 
 .kb-partners__empty {
     margin: 0;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--secondary);
-    text-align: center;
 }
 
 .kb-guestbook__hint {
-    margin: 0 0 14px;
-    font-size: 13px;
+    margin: 0 0 12px;
+    font-size: 12px;
     color: var(--secondary);
-    text-align: center;
 }
 
 .kb-guestbook__box {
     min-height: 120px;
-    margin: 0 0 40px;
+    margin: 0;
 }
 
 /* ---------------------------------------------------------------- 书页面 */
@@ -947,6 +1080,46 @@ body:has(.kb-shelf-page) .main {
     border-color: var(--kb-note);
 }
 
+/* 窄屏放不下两栏：侧栏落到书架下方，恢复正常文档流 */
+@media (max-width: 900px) {
+    .kb-shelf-body {
+        display: block;
+    }
+
+    .kb-side {
+        position: relative;
+        max-height: none;
+        margin-top: 34px;
+    }
+
+    .kb-side__body {
+        overflow: visible;
+    }
+
+    .kb-side__toggle {
+        align-self: flex-start;
+    }
+
+    .kb-side.is-collapsed {
+        flex-basis: auto;
+    }
+
+    .kb-side.is-collapsed .kb-side__body {
+        width: 100%;
+    }
+
+    .kb-side.is-collapsed .kb-side__toggle {
+        align-self: flex-start;
+        height: 26px;
+        padding: 0 10px;
+        font-size: 11px;
+    }
+
+    .kb-side.is-collapsed .kb-side__toggle-text {
+        display: inline;
+    }
+}
+
 @media (max-width: 640px) {
     .kb-hero h1 {
         font-size: 24px;
@@ -961,7 +1134,8 @@ body:has(.kb-shelf-page) .main {
     }
 
     .kb-shelf {
-        gap: 14px;
+        grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+        gap: 20px 14px;
     }
 
     .kb-shelf-head h1 {
@@ -978,33 +1152,15 @@ body:has(.kb-shelf-page) .main {
         font-size: 13px;
     }
 
-    .kb-book {
-        flex: 0 0 112px;
-    }
-
-    .kb-book__spine {
-        width: 10px;
-    }
-
-    .kb-book__face {
-        padding: 12px 10px 12px 20px;
+    .kb-book__cover {
+        padding: 9px 10px 10px;
     }
 
     .kb-book__title {
-        font-size: 15px;
+        font-size: 12px;
     }
 
     .kb-book__domain {
         letter-spacing: .08em;
-    }
-
-    .kb-partners,
-    .kb-guestbook {
-        margin-top: 48px;
-    }
-
-    .kb-partner {
-        height: 34px;
-        font-size: 12px;
     }
 }

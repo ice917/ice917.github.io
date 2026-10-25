@@ -16,80 +16,99 @@
     </button>
   </header>
 
-  {{- if $books }}
-  <div class="kb-shelf-wrap">
-    <div class="kb-shelf" data-shelf>
-      {{- range $i, $b := $books }}
-      {{- $domain := $b.Params.domain | default "未分类" -}}
-      {{- $accent := $b.Params.accent | default (index $palette (mod $i (len $palette))) -}}
-      <a class="kb-book" href="{{ $b.RelPermalink }}" data-domain="{{ $domain }}" style="--book-accent: {{ $accent }};">
-        <span class="kb-book__cover">
-          <span class="kb-book__spine" aria-hidden="true"></span>
-          <span class="kb-book__face">
+  <div class="kb-shelf-body">
+    <div class="kb-shelf-main">
+      {{- if $books }}
+      <div class="kb-shelf-tools">
+        <label class="kb-shelf-search">
+          <svg class="kb-shelf-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20 16.4 16.4"/></svg>
+          <input type="search" data-book-search placeholder="搜索书名" aria-label="搜索书名" autocomplete="off" spellcheck="false">
+        </label>
+        {{- if gt (len $domains) 1 }}
+        <div class="kb-filter" role="group" aria-label="按领域筛选书籍">
+          <button type="button" class="kb-filter__chip is-on" data-domain="*" aria-pressed="true">全部</button>
+          {{- range $domains }}
+          <button type="button" class="kb-filter__chip" data-domain="{{ . }}" aria-pressed="false">{{ . }}</button>
+          {{- end }}
+        </div>
+        {{- end }}
+      </div>
+
+      <div class="kb-shelf" data-shelf>
+        {{- range $i, $b := $books }}
+        {{- $domain := $b.Params.domain | default "未分类" -}}
+        {{- $accent := $b.Params.accent | default (index $palette (mod $i (len $palette))) -}}
+        <a class="kb-book" href="{{ $b.RelPermalink }}" data-domain="{{ $domain }}" data-title="{{ $b.Title }}" style="--book-accent: {{ $accent }};">
+          <span class="kb-book__cover">
             <span class="kb-book__domain">{{ $domain }}</span>
+            <span class="kb-book__lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          </span>
+          <span class="kb-book__name">
             <span class="kb-book__title">{{ $b.Title }}</span>
-            <span class="kb-book__line" aria-hidden="true"></span>
             <span class="kb-book__author">{{ $b.Params.author | default site.Params.author }}</span>
           </span>
-        </span>
-      </a>
+        </a>
+        {{- end }}
+      </div>
+
+      <p class="kb-shelf-none" data-shelf-none hidden>没有匹配的书。</p>
+      {{- else }}
+      <p class="kb-empty">书架还是空的。点右上角的加号，看看怎么放第一本书上去。</p>
       {{- end }}
     </div>
-    <span class="kb-shelf__plank" aria-hidden="true"></span>
+
+    <aside class="kb-side" data-side aria-label="合作伙伴与留言">
+      <button type="button" class="kb-side__toggle" data-side-toggle aria-expanded="true" aria-controls="kb-side-body" aria-label="收起侧栏">
+        <span class="kb-side__toggle-text">收起</span>
+        <span class="kb-side__toggle-icon" aria-hidden="true">›</span>
+      </button>
+      <div class="kb-side__body" id="kb-side-body">
+        {{- /* 合作伙伴：数据来自 data/partners.yaml，空表时显示占位，填入后自动变成图标墙 */ -}}
+        {{- $partners := hugo.Data.partners }}
+        <section class="kb-partners" aria-labelledby="kb-partners-title">
+          <h2 id="kb-partners-title">合作伙伴</h2>
+          {{- if $partners }}
+          <ul class="kb-partners__list">
+            {{- range $partners }}
+            {{- $icon := .icon -}}
+            {{- if not $icon -}}
+              {{- $host := (urls.Parse .url).Host | default .url -}}
+              {{- $icon = printf "https://%s/favicon.ico" $host -}}
+            {{- end }}
+            <li>
+              <a class="kb-partner" href="{{ .url }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"{{ with .note }} title="{{ . }}"{{ end }}>
+                <span class="kb-partner__logo">
+                  <img src="{{ $icon }}" alt="" width="18" height="18" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">
+                  <svg class="kb-partner__fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"/></svg>
+                </span>
+                <span class="kb-partner__name">{{ .name }}</span>
+              </a>
+            </li>
+            {{- end }}
+          </ul>
+          {{- else }}
+          <p class="kb-partners__empty">暂无合作伙伴</p>
+          {{- end }}
+        </section>
+
+        {{- /* 留言：Utterances（GitHub Issues），公开可读，写留言需 GitHub 账号 */ -}}
+        <section class="kb-guestbook" id="guestbook" aria-labelledby="kb-guestbook-title">
+          <h2 id="kb-guestbook-title">留言</h2>
+          <p class="kb-guestbook__hint">所有人无需登录即可查看；写留言需要一个 GitHub 账号。</p>
+          <div class="kb-guestbook__box" data-guestbook></div>
+        </section>
+      </div>
+    </aside>
   </div>
+  <script>
+  try {
+    if (localStorage.getItem('kb-side') === 'closed') {
+      var kbSide = document.querySelector('[data-side]');
+      if (kbSide) kbSide.classList.add('is-collapsed');
+    }
+  } catch (e) {}
+  </script>
 
-  <div class="kb-shelf-foot" data-shelf-foot hidden>
-    <button type="button" data-shelf-dir="-1" aria-label="向左滑动">‹</button>
-    <span class="kb-shelf__swipe">可滑动</span>
-    <button type="button" data-shelf-dir="1" aria-label="向右滑动">›</button>
-  </div>
-
-  {{- if gt (len $domains) 1 }}
-  <div class="kb-filter" role="group" aria-label="按领域筛选书籍">
-    <button type="button" class="kb-filter__chip is-on" data-domain="*" aria-pressed="true">全部</button>
-    {{- range $domains }}
-    <button type="button" class="kb-filter__chip" data-domain="{{ . }}" aria-pressed="false">{{ . }}</button>
-    {{- end }}
-  </div>
-  {{- end }}
-  {{- else }}
-  <p class="kb-empty">书架还是空的。点右上角的加号，看看怎么放第一本书上去。</p>
-  {{- end }}
-
-  {{- /* 合作伙伴：数据来自 data/partners.yaml，空表时显示占位，填入后自动变成图标墙 */ -}}
-  {{- $partners := hugo.Data.partners }}
-  <section class="kb-partners" aria-labelledby="kb-partners-title">
-    <h2 id="kb-partners-title">合作伙伴</h2>
-    {{- if $partners }}
-    <ul class="kb-partners__list">
-      {{- range $partners }}
-      {{- $icon := .icon -}}
-      {{- if not $icon -}}
-        {{- $host := (urls.Parse .url).Host | default .url -}}
-        {{- $icon = printf "https://%s/favicon.ico" $host -}}
-      {{- end }}
-      <li>
-        <a class="kb-partner" href="{{ .url }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"{{ with .note }} title="{{ . }}"{{ end }}>
-          <span class="kb-partner__logo">
-            <img src="{{ $icon }}" alt="" width="18" height="18" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">
-            <svg class="kb-partner__fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"/></svg>
-          </span>
-          <span class="kb-partner__name">{{ .name }}</span>
-        </a>
-      </li>
-      {{- end }}
-    </ul>
-    {{- else }}
-    <p class="kb-partners__empty">暂无合作伙伴</p>
-    {{- end }}
-  </section>
-
-  {{- /* 留言：Utterances（GitHub Issues），公开可读，写留言需 GitHub 账号 */ -}}
-  <section class="kb-guestbook" id="guestbook" aria-labelledby="kb-guestbook-title">
-    <h2 id="kb-guestbook-title">留言</h2>
-    <p class="kb-guestbook__hint">所有人无需登录即可查看；写留言需要一个 GitHub 账号。</p>
-    <div class="kb-guestbook__box" data-guestbook></div>
-  </section>
   <script>
   (function () {
     var box = document.querySelector('[data-guestbook]');
