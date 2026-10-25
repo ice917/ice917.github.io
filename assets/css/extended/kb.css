@@ -484,10 +484,40 @@ body:has(.kb-shelf-page) .main {
     letter-spacing: -.02em;
 }
 
-.kb-shelf-add {
+/* 标题行右侧：GitHub 图标 + 添加书 */
+.kb-shelf-head__act {
     position: absolute;
     top: 50%;
     right: 0;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    transform: translateY(-50%);
+}
+
+.kb-shelf-gh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.kb-shelf-gh:hover {
+    color: var(--kb-note);
+    border-color: var(--kb-note);
+}
+
+.kb-shelf-gh:focus-visible {
+    outline: 2px solid var(--kb-note);
+    outline-offset: 2px;
+}
+
+.kb-shelf-add {
     display: inline-flex;
     gap: 4px;
     align-items: center;
@@ -501,7 +531,6 @@ body:has(.kb-shelf-page) .main {
     border: 1px solid var(--border);
     border-radius: 9px;
     cursor: pointer;
-    transform: translateY(-50%);
     transition: color .15s ease, border-color .15s ease;
 }
 
@@ -659,6 +688,19 @@ body:has(.kb-shelf-page) .main {
     color: var(--secondary);
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+/* 有真实封面图时：图铺满卡片，不再画纸页 */
+.kb-book__cover--image {
+    padding: 0;
+    background: var(--entry);
+}
+
+.kb-book__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* 纸上的假文字行，纯视觉，不进读屏 */
@@ -1146,6 +1188,11 @@ body:has(.kb-shelf-page) .main {
         height: 27px;
         padding: 0 9px;
         font-size: 11px;
+    }
+
+    .kb-shelf-gh {
+        width: 27px;
+        height: 27px;
     }
 
     .kb-shelf-add__plus {

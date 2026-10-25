@@ -7,13 +7,25 @@
 {{- end -}}
 {{- $domains = $domains | uniq | sort -}}
 {{- $palette := slice "#2f6fed" "#2f8f6f" "#8b5cf6" "#b4762a" "#c2410c" "#0e7490" -}}
+{{- /* 书架页隐藏了顶部导航，GitHub 入口单独放回标题行右侧 */ -}}
+{{- $github := "" -}}
+{{- range site.Params.socialIcons -}}
+  {{- if eq .name "github" }}{{ $github = .url }}{{ end -}}
+{{- end -}}
 <div class="kb-shelf-page">
   <header class="kb-shelf-head">
     <h1>书架</h1>
-    <button type="button" class="kb-shelf-add" data-newbook aria-label="添加一本书" title="添加一本书">
-      <span class="kb-shelf-add__plus" aria-hidden="true">+</span>
-      <span class="kb-shelf-add__text">添加书</span>
-    </button>
+    <div class="kb-shelf-head__act">
+      {{- with $github }}
+      <a class="kb-shelf-gh" href="{{ . }}" target="_blank" rel="noopener noreferrer" aria-label="打开我的 GitHub" title="GitHub">
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+      {{- end }}
+      <button type="button" class="kb-shelf-add" data-newbook aria-label="添加一本书" title="添加一本书">
+        <span class="kb-shelf-add__plus" aria-hidden="true">+</span>
+        <span class="kb-shelf-add__text">添加书</span>
+      </button>
+    </div>
   </header>
 
   <div class="kb-shelf-body">
@@ -38,11 +50,34 @@
         {{- range $i, $b := $books }}
         {{- $domain := $b.Params.domain | default "未分类" -}}
         {{- $accent := $b.Params.accent | default (index $palette (mod $i (len $palette))) -}}
+        {{- /* 封面图：cover.image（PaperMod 只认映射形式，写成字符串会让主题的 opengraph 模板报错）。
+              相对路径先找页面资源（page bundle），再找 assets，都没有就原样当链接用。 */ -}}
+        {{- $coverSrc := "" -}}
+        {{- with $b.Params.cover -}}
+          {{- with .image }}{{ $coverSrc = . }}{{ end -}}
+        {{- end -}}
+        {{- $coverURL := "" -}}
+        {{- with $coverSrc -}}
+          {{- $coverURL = . -}}
+          {{- if not (hasPrefix . "http") -}}
+            {{- with $b.Resources.GetMatch . -}}
+              {{- $coverURL = .RelPermalink -}}
+            {{- else -}}
+              {{- with resources.GetMatch . }}{{ $coverURL = .RelPermalink }}{{ end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
         <a class="kb-book" href="{{ $b.RelPermalink }}" data-domain="{{ $domain }}" data-title="{{ $b.Title }}" style="--book-accent: {{ $accent }};">
+          {{- if $coverURL }}
+          <span class="kb-book__cover kb-book__cover--image">
+            <img class="kb-book__img" src="{{ $coverURL }}" alt="" loading="lazy" decoding="async">
+          </span>
+          {{- else }}
           <span class="kb-book__cover">
             <span class="kb-book__domain">{{ $domain }}</span>
             <span class="kb-book__lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
           </span>
+          {{- end }}
           <span class="kb-book__name">
             <span class="kb-book__title">{{ $b.Title }}</span>
             <span class="kb-book__author">{{ $b.Params.author | default site.Params.author }}</span>
@@ -135,7 +170,7 @@
       <p>本站是静态站点，书就是仓库里的一个目录，不能在这里直接写文件。三步：</p>
       <ol>
         <li>在 <code>content/</code> 下新建目录，目录名就是这本书的网址，例如 <code>thermal/</code>。</li>
-        <li>在目录里新建 <code>_index.md</code>，写入下面这份元数据。</li>
+        <li>在目录里新建 <code>_index.md</code>，写入下面这份元数据。封面图可选：把 3:4 的图片放进同一目录，在 <code>cover</code> 下写 <code>image: 图片文件名</code>（缩进两格，不要写成一行）。</li>
         <li>提交推送，书架会自动多出一张封面。</li>
       </ol>
       <pre><code>---
@@ -144,6 +179,8 @@ description: 一句话介绍这本书
 author: 你的名字
 domain: 领域名
 accent: "#2f6fed"
+cover:
+  image: cover.jpg
 weight: 20
 ---</code></pre>
       <div class="kb-newbook__act">

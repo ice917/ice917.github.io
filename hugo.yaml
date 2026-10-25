@@ -44,7 +44,7 @@ params:
   # 社交图标
   socialIcons:
     - name: github
-      url: "https://github.com/yourname"
+      url: "https://github.com/ice917"
       title: "访问我的 GitHub"
     - name: email
       url: "mailto:your@email.com"
