@@ -56,6 +56,60 @@
   <p class="kb-empty">书架还是空的。点右上角的加号，看看怎么放第一本书上去。</p>
   {{- end }}
 
+  {{- /* 合作伙伴：数据来自 data/partners.yaml，空表时显示占位，填入后自动变成图标墙 */ -}}
+  {{- $partners := hugo.Data.partners }}
+  <section class="kb-partners" aria-labelledby="kb-partners-title">
+    <h2 id="kb-partners-title">合作伙伴</h2>
+    {{- if $partners }}
+    <ul class="kb-partners__list">
+      {{- range $partners }}
+      {{- $icon := .icon -}}
+      {{- if not $icon -}}
+        {{- $host := (urls.Parse .url).Host | default .url -}}
+        {{- $icon = printf "https://%s/favicon.ico" $host -}}
+      {{- end }}
+      <li>
+        <a class="kb-partner" href="{{ .url }}" target="_blank" rel="noopener"{{ with .note }} title="{{ . }}"{{ end }}>
+          <span class="kb-partner__logo">
+            <img src="{{ $icon }}" alt="" width="18" height="18" loading="lazy" decoding="async" onerror="this.remove()">
+            <svg class="kb-partner__fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"/></svg>
+          </span>
+          <span class="kb-partner__name">{{ .name }}</span>
+        </a>
+      </li>
+      {{- end }}
+    </ul>
+    {{- else }}
+    <p class="kb-partners__empty">暂无合作伙伴</p>
+    {{- end }}
+  </section>
+
+  {{- /* 留言：Utterances（GitHub Issues），公开可读，写留言需 GitHub 账号 */ -}}
+  <section class="kb-guestbook" id="guestbook" aria-labelledby="kb-guestbook-title">
+    <h2 id="kb-guestbook-title">留言</h2>
+    <p class="kb-guestbook__hint">所有人无需登录即可查看；写留言需要一个 GitHub 账号。</p>
+    <div class="kb-guestbook__box" data-guestbook></div>
+  </section>
+  <script>
+  (function () {
+    var box = document.querySelector('[data-guestbook]');
+    if (!box || box.firstChild) return;
+    var pref = 'auto';
+    try { pref = localStorage.getItem('pref-theme') || 'auto'; } catch (e) {}
+    var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var dark = pref === 'dark' || (pref !== 'light' && systemDark);
+    var s = document.createElement('script');
+    s.src = 'https://utteranc.es/client.js';
+    s.async = true;
+    s.crossOrigin = 'anonymous';
+    s.setAttribute('repo', 'ice917/ice917.github.io');
+    s.setAttribute('issue-term', 'pathname');
+    s.setAttribute('label', '留言');
+    s.setAttribute('theme', dark ? 'github-dark' : 'github-light');
+    box.appendChild(s);
+  })();
+  </script>
+
   <dialog class="kb-newbook" data-newbook-dialog aria-labelledby="kb-newbook-title">
     <div class="kb-newbook__box">
       <h2 id="kb-newbook-title">新建一本书</h2>
