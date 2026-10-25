@@ -87,7 +87,7 @@
     /* 必须在这里重复声明：kb.css 里 :root[data-theme="dark"] 与本文件的基础块同为 (0,2,0)，
        而 kb.css 排在本文件之后，基础块里那条会被它盖掉（实测 --kb-note 曾回落到 #6ea8ff） */
     --kb-note: var(--hk-accent);
-    --kb-tag: #a5947a;   /* 暗色下 tag 走次级色，7.71:1；学院亮色留给节点 */
+    --kb-tag: #a5947a;   /* 暗色下 tag 走次级色，#a5947a on #14100D = 6.41:1；学院亮色留给节点 */
     --kb-shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 10px 28px rgba(0, 0, 0, .55);
     color-scheme: dark;
 }
