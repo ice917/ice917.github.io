@@ -1,3 +1,15 @@
+{{- /* 彩蛋皮肤：样式表生效前先把 data-egg 挂到 <html>，否则刷新会闪一下默认皮肤。
+       内联（非 defer）是刻意的：必须赶在第一帧之前跑完。 */ -}}
+<script>
+try {
+  var kbEgg = JSON.parse(localStorage.getItem('kb-egg') || 'null');
+  if (kbEgg && kbEgg.on) {
+    document.documentElement.setAttribute('data-egg', 'hogwarts');
+    if (kbEgg.house) document.documentElement.setAttribute('data-house', kbEgg.house);
+  }
+} catch (e) {}
+</script>
+
 {{- /* 阅读历史：每个页面都要记录，所以无条件加载 */ -}}
 {{- $history := resources.Get "js/kb-history.js" | fingerprint "sha256" -}}
 <script defer src="{{ $history.RelPermalink }}" integrity="{{ $history.Data.Integrity }}" crossorigin="anonymous"></script>
@@ -6,6 +18,8 @@
 {{- if .IsHome -}}
 {{- $shelf := resources.Get "js/kb-shelf.js" | fingerprint "sha256" -}}
 <script defer src="{{ $shelf.RelPermalink }}" integrity="{{ $shelf.Data.Integrity }}" crossorigin="anonymous"></script>
+{{- $egg := resources.Get "js/kb-egg.js" | fingerprint "sha256" -}}
+<script defer src="{{ $egg.RelPermalink }}" integrity="{{ $egg.Data.Integrity }}" crossorigin="anonymous"></script>
 {{- end -}}
 
 {{- /* 知识地图脚本：书页面与书内笔记页需要（顶层独立页面没有地图） */ -}}

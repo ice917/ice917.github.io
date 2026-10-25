@@ -1,0 +1,274 @@
+/* ==========================================================================
+   霍格沃兹彩蛋 —— 只有在 <html data-egg="hogwarts"> 时才生效
+   未激活时整个文件对页面零影响（所有规则都以 :root[data-egg=...] 或 .hk-cer 开头）。
+
+   两套皮肤，跟随 PaperMod 自己的 data-theme，不另造开关：
+     data-theme != dark → 羊皮纸日（墨褐字 #2B2018 on #EFE3C6 = 12.46:1）
+     data-theme == dark → 烛光夜（羊皮纸白 #E8DCC0 on #14100D = 13.9:1）
+   学院色只做点缀（描边、引文线、印章），正文与标题一律走 --primary/--content。
+   ========================================================================== */
+
+/* Cinzel 的 latin 子集，OFL 授权，取自 Google Fonts v26。
+   只有彩蛋激活后标题才会用到它，浏览器因此只在激活后才下载。 */
+@font-face {
+    font-family: "Cinzel";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("/fonts/cinzel-latin.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Cinzel";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/cinzel-latin.woff2") format("woff2");
+}
+
+:root[data-egg="hogwarts"] {
+    /* 标题用铭文体（Cinzel 无中日韩字形，汉字自动落到宋体系）；
+       正文仍用衬线，但不用 Cinzel，否则整段拉丁文会变成小型大写字母 */
+    --hk-display: "Cinzel", Georgia, "Songti SC", "STSong", "SimSun", serif;
+    --hk-serif: Georgia, "Times New Roman", "Songti SC", "STSong", "SimSun", serif;
+
+    /* 金线：亮色下 #D8B14A 只有 1.6:1，只能用在暗色；
+       亮色改用 #A8791E（3.04:1），够做描边与分隔线，但不做文字色 */
+    --hk-gold: #a8791e;
+    --hk-gold-soft: rgba(168, 121, 30, .38);
+
+    --hk-deep: #7f0909;
+    --hk-bright: #d3a625;
+    --hk-accent: var(--hk-deep);
+
+    --hk-glow:
+        radial-gradient(1100px 620px at 50% -6%, rgba(255, 249, 228, .85) 0%, rgba(255, 249, 228, 0) 62%),
+        radial-gradient(900px 520px at 50% 104%, rgba(120, 84, 30, .12) 0%, rgba(120, 84, 30, 0) 60%);
+
+    /* 羊皮纸日 */
+    --theme: #efe3c6;
+    --entry: #f8f0de;
+    --primary: #2b2018;
+    --secondary: #6a5844;
+    --tertiary: #d6c4a0;
+    --content: #3a2c20;
+    --code-bg: #e6d7b5;
+    --code-block-bg: #241b14;
+    --border: #dacaa7;
+
+    /* 知识地图的 Canvas 也读这两个变量（kb-graph.js 的 palette()），
+       所以图谱节点/连线会跟着学院走；tag 用墨褐，避免与学院色糊在一起 */
+    --kb-note: var(--hk-accent);
+    --kb-tag: #6a5844;
+
+    --kb-shadow: 0 1px 2px rgba(43, 32, 24, .06), 0 10px 28px rgba(43, 32, 24, .10);
+    color-scheme: light;
+}
+
+:root[data-egg="hogwarts"][data-theme="dark"] {
+    --hk-gold: #d8b14a;
+    --hk-gold-soft: rgba(216, 177, 74, .34);
+    --hk-accent: var(--hk-bright);
+
+    --hk-glow:
+        radial-gradient(1100px 620px at 50% -6%, rgba(216, 177, 74, .14) 0%, rgba(216, 177, 74, 0) 60%),
+        radial-gradient(760px 460px at 50% 108%, rgba(160, 82, 24, .12) 0%, rgba(160, 82, 24, 0) 62%);
+
+    /* 烛光夜 */
+    --theme: #14100d;
+    --entry: #1f1913;
+    --primary: #e8dcc0;
+    --secondary: #a5947a;
+    --tertiary: #3b3126;
+    --content: #d9ccb0;
+    --code-bg: #1b1610;
+    --code-block-bg: #0d0a07;
+    --border: #332a20;
+    /* 必须在这里重复声明：kb.css 里 :root[data-theme="dark"] 与本文件的基础块同为 (0,2,0)，
+       而 kb.css 排在本文件之后，基础块里那条会被它盖掉（实测 --kb-note 曾回落到 #6ea8ff） */
+    --kb-note: var(--hk-accent);
+    --kb-tag: #a5947a;   /* 暗色下 tag 走次级色，7.71:1；学院亮色留给节点 */
+    --kb-shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 10px 28px rgba(0, 0, 0, .55);
+    color-scheme: dark;
+}
+
+/* 四院：只给深/亮两支原色，映到 --hk-accent 的规则按明暗各取一支 */
+:root[data-egg="hogwarts"][data-house="gryffindor"] { --hk-deep: #7f0909; --hk-bright: #d3a625; }
+:root[data-egg="hogwarts"][data-house="slytherin"]  { --hk-deep: #1a472a; --hk-bright: #bfc9be; }
+:root[data-egg="hogwarts"][data-house="ravenclaw"]  { --hk-deep: #0e1a40; --hk-bright: #c0a16b; }
+:root[data-egg="hogwarts"][data-house="hufflepuff"] { --hk-deep: #5c4210; --hk-bright: #ecb939; }
+
+/* ------------------------------------------------------------------ 纸面 */
+
+/* .list 在 PaperMod 里自带 background: var(--code-bg)，必须一起改，否则列表页是另一张纸 */
+:root[data-egg="hogwarts"] body,
+:root[data-egg="hogwarts"] .list {
+    background-color: var(--theme);
+    background-image: var(--hk-glow);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+:root[data-egg="hogwarts"] ::selection {
+    color: var(--primary);
+    background: rgba(216, 177, 74, .38);
+}
+
+/* ------------------------------------------------------------------ 字 */
+
+:root[data-egg="hogwarts"] body {
+    font-family: var(--hk-serif);
+}
+
+:root[data-egg="hogwarts"] h1,
+:root[data-egg="hogwarts"] h2,
+:root[data-egg="hogwarts"] h3,
+:root[data-egg="hogwarts"] h4,
+:root[data-egg="hogwarts"] h5,
+:root[data-egg="hogwarts"] h6,
+:root[data-egg="hogwarts"] .post-title,
+:root[data-egg="hogwarts"] .kb-shelf-head h1,
+:root[data-egg="hogwarts"] .kb-side h2,
+:root[data-egg="hogwarts"] .kb-book__title {
+    font-family: var(--hk-display);
+    letter-spacing: .015em;
+}
+
+/* 书架标题下的一道学院色细线，像扉页上的烫金；auto 居中，因为 h1 是通栏块 */
+:root[data-egg="hogwarts"] .kb-shelf-head h1::after {
+    content: "";
+    display: block;
+    width: 68px;
+    height: 2px;
+    margin: 10px auto 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0), var(--hk-accent), rgba(0, 0, 0, 0));
+}
+
+/* ------------------------------------------------------------------ 线 */
+
+:root[data-egg="hogwarts"] .kb-shelf-head,
+:root[data-egg="hogwarts"] .post-header,
+:root[data-egg="hogwarts"] .kb-side,
+:root[data-egg="hogwarts"] .footer,
+:root[data-egg="hogwarts"] .kb-shelf-tools {
+    border-color: var(--hk-gold-soft);
+}
+
+:root[data-egg="hogwarts"] .md-content blockquote {
+    border-inline-start-color: var(--hk-accent);
+}
+
+:root[data-egg="hogwarts"] .md-content hr {
+    height: 1px;
+    background: var(--hk-gold-soft);
+}
+
+:root[data-egg="hogwarts"] .md-content a:not(.anchor) {
+    text-decoration-color: var(--hk-gold);
+    text-underline-offset: 3px;
+}
+
+/* 书封烫金内框：只画一圈 1px 线，不碰现有立体阴影与白边 */
+:root[data-egg="hogwarts"] .kb-book__cover::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    z-index: 2;
+    border: 1px solid rgba(216, 177, 74, .42);
+    border-radius: 2px 4px 4px 2px;
+    pointer-events: none;
+}
+
+:root[data-egg="hogwarts"] .kb-book:focus-visible .kb-book__cover {
+    outline-color: var(--hk-gold);
+}
+
+/* ==========================================================================
+   分院帽仪式：全屏浮层，只在书架页由 kb-egg.js 创建
+   ========================================================================== */
+
+.hk-cer {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    overflow: hidden;
+    font-family: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+    color: #e8dcc0;
+    background: radial-gradient(120% 92% at 50% 0%, #1b1409 0%, #0b0805 62%, #060403 100%);
+    opacity: 0;
+    transition: opacity .32s ease;
+}
+
+.hk-cer.is-in { opacity: 1; }
+.hk-cer.is-out { opacity: 0; }
+
+/* 视口内的一道细金框，像书的切口 */
+.hk-cer::after {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgba(216, 177, 74, .22);
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.hk-cer__card {
+    max-width: 34rem;
+    text-align: center;
+}
+
+.hk-cer__kicker {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: .42em;
+    color: rgba(216, 177, 74, .78);
+}
+
+.hk-cer__name {
+    margin: 20px 0 10px;
+    font-family: "Cinzel", Georgia, "Songti SC", "STSong", "SimSun", serif;
+    font-size: clamp(30px, 7vw, 52px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: .05em;
+    color: #e8dcc0;
+    text-shadow: 0 0 28px rgba(216, 177, 74, .32);
+    transition: color .3s ease;
+}
+
+.hk-cer__en {
+    margin: 0;
+    min-height: 1.2em;
+    font-size: 11px;
+    letter-spacing: .34em;
+    color: rgba(232, 220, 192, .52);
+}
+
+.hk-cer__hint {
+    margin: 26px 0 0;
+    font-size: 12px;
+    letter-spacing: .08em;
+    color: rgba(232, 220, 192, .40);
+}
+
+.hk-cer.is-final .hk-cer__name {
+    color: #f1d48a;
+    text-shadow: 0 0 34px rgba(216, 177, 74, .55);
+}
+
+.hk-cer.is-final .hk-cer__card::after {
+    content: "";
+    display: block;
+    width: 88px;
+    height: 1px;
+    margin: 22px auto 0;
+    background: linear-gradient(90deg, rgba(216, 177, 74, 0), rgba(216, 177, 74, .9), rgba(216, 177, 74, 0));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hk-cer { transition: none; }
+    .hk-cer__name { transition: none; }
+}
