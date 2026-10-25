@@ -29,28 +29,37 @@
   </div>
   {{- end }}
 
-  <p class="kb-shelf__hint">点开封面进入一本书。每本书有自己的地图、笔记与标签。</p>
+  <div class="kb-shelf-bar">
+    <p class="kb-shelf__hint">点开封面进入一本书。每本书有自己的地图、笔记与标签。</p>
+    <div class="kb-shelf__nav" data-shelf-nav hidden>
+      <button type="button" data-shelf-dir="-1" aria-label="向左滑动书架">‹</button>
+      <button type="button" data-shelf-dir="1" aria-label="向右滑动书架">›</button>
+    </div>
+  </div>
 
-  <div class="kb-shelf" data-shelf>
-    {{- range $i, $b := $books }}
-    {{- $domain := $b.Params.domain | default "未分类" -}}
-    {{- $accent := $b.Params.accent | default (index $palette (mod $i (len $palette))) -}}
-    <a class="kb-book" href="{{ $b.RelPermalink }}" data-domain="{{ $domain }}" style="--book-accent: {{ $accent }};">
-      <span class="kb-book__cover">
-        <span class="kb-book__spine" aria-hidden="true"></span>
-        <span class="kb-book__face">
-          <span class="kb-book__domain">{{ $domain }}</span>
-          <span class="kb-book__title">{{ $b.Title }}</span>
-          <span class="kb-book__line" aria-hidden="true"></span>
-          <span class="kb-book__author">{{ $b.Params.author | default site.Params.author }}</span>
+  <div class="kb-shelf-wrap">
+    <div class="kb-shelf" data-shelf>
+      {{- range $i, $b := $books }}
+      {{- $domain := $b.Params.domain | default "未分类" -}}
+      {{- $accent := $b.Params.accent | default (index $palette (mod $i (len $palette))) -}}
+      <a class="kb-book" href="{{ $b.RelPermalink }}" data-domain="{{ $domain }}" style="--book-accent: {{ $accent }};">
+        <span class="kb-book__cover">
+          <span class="kb-book__spine" aria-hidden="true"></span>
+          <span class="kb-book__face">
+            <span class="kb-book__domain">{{ $domain }}</span>
+            <span class="kb-book__title">{{ $b.Title }}</span>
+            <span class="kb-book__line" aria-hidden="true"></span>
+            <span class="kb-book__author">{{ $b.Params.author | default site.Params.author }}</span>
+          </span>
         </span>
-      </span>
-      <span class="kb-book__meta">
-        <span class="kb-book__name">{{ $b.Title }}</span>
-        <span class="kb-book__count">{{ len $b.RegularPages }} 篇</span>
-      </span>
-    </a>
-    {{- end }}
+        <span class="kb-book__meta">
+          <span class="kb-book__name">{{ $b.Title }}</span>
+          <span class="kb-book__count">{{ len $b.RegularPages }} 篇</span>
+        </span>
+      </a>
+      {{- end }}
+    </div>
+    <span class="kb-shelf__plank" aria-hidden="true"></span>
   </div>
   {{- else }}
   <p class="kb-empty">书架还是空的。在 <code>content/</code> 下新建一个目录并放入 <code>_index.md</code>，它就是一本新书。</p>

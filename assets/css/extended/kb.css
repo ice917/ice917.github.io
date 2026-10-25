@@ -488,10 +488,53 @@
 
 /* ---------------------------------------------------------------- 书架 */
 
-.kb-shelf__hint {
+.kb-shelf-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    align-items: center;
+    justify-content: space-between;
     margin: 18px 0 0;
+}
+
+.kb-shelf__hint {
+    margin: 0;
     font-size: 12px;
     color: var(--secondary);
+}
+
+.kb-shelf__nav {
+    display: flex;
+    gap: 6px;
+}
+
+/* [hidden] 的 UA 样式会被上面的 display:flex 盖掉，这里补回来 */
+.kb-shelf__nav[hidden] {
+    display: none;
+}
+
+.kb-shelf__nav button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--secondary);
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.kb-shelf__nav button:hover {
+    color: var(--kb-note);
+    border-color: var(--kb-note);
+}
+
+.kb-shelf__nav button:focus-visible {
+    outline: 2px solid var(--kb-note);
+    outline-offset: 2px;
 }
 
 .kb-filter {
@@ -524,17 +567,48 @@
     border-color: var(--kb-note);
 }
 
+/* 一排书封，横向滑动，像真的书架 */
+.kb-shelf-wrap {
+    position: relative;
+    /* 书少时收窄到内容宽度，搁板就不会长得没边；书多时被 max-width 截住并横向滚动 */
+    width: fit-content;
+    max-width: 100%;
+    margin: 10px 0 8px;
+}
+
 .kb-shelf {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
-    gap: 22px;
-    margin: 20px 0 10px;
+    display: flex;
+    gap: 20px;
+    padding: 6px 2px 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+}
+
+.kb-shelf::-webkit-scrollbar {
+    display: none;
+}
+
+/* 搁板：书封立在上面，不随横向滚动移动 */
+.kb-shelf__plank {
+    position: absolute;
+    bottom: 4px;
+    left: 2px;
+    right: 2px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    pointer-events: none;
 }
 
 .kb-book {
+    flex: 0 0 152px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 9px;
+    scroll-snap-align: start;
     color: inherit;
     text-decoration: none;
 }
@@ -548,7 +622,7 @@
     position: relative;
     display: block;
     overflow: hidden;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 5 / 9;
     background:
         linear-gradient(155deg, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, 0) 44%),
         linear-gradient(200deg, rgba(0, 0, 0, .04), rgba(0, 0, 0, .34)),
@@ -734,8 +808,11 @@
     }
 
     .kb-shelf {
-        grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
         gap: 14px;
+    }
+
+    .kb-book {
+        flex: 0 0 112px;
     }
 
     .kb-book__spine {
