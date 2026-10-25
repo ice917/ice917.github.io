@@ -1,7 +1,6 @@
-{{- /* 书架：站点最外层。一个顶级 section 就是一本书，点封面进入书页面。 */ -}}
+{{- /* 书架：站点最外层。一个顶级 section 就是一本书，点封面进入那本书的地图页。 */ -}}
 {{- define "main" }}
 {{- $books := sort site.Sections "Weight" "asc" -}}
-{{- $entries := where site.RegularPages "Section" "!=" "" -}}
 {{- $domains := slice -}}
 {{- range $books -}}
   {{- $domains = $domains | append (.Params.domain | default "未分类") -}}
@@ -9,34 +8,12 @@
 {{- $domains = $domains | uniq | sort -}}
 {{- $palette := slice "#2f6fed" "#2f8f6f" "#8b5cf6" "#b4762a" "#c2410c" "#0e7490" -}}
 <div class="kb-shelf-page">
-  <section class="kb-hero">
-    <h1>{{ site.Title }}</h1>
-    <p>{{ site.Params.description }}</p>
-    <div class="kb-stats">
-      <span><b>{{ len $books }}</b> 本书</span>
-      <span><b>{{ len $entries }}</b> 篇笔记</span>
-      <span><b>{{ len $domains }}</b> 个领域</span>
-    </div>
-  </section>
+  <header class="kb-shelf-head">
+    <h1>书架</h1>
+    <button type="button" class="kb-shelf-add" data-newbook aria-label="新建一本书" title="新建一本书">+</button>
+  </header>
 
   {{- if $books }}
-  {{- if gt (len $domains) 1 }}
-  <div class="kb-filter" role="group" aria-label="按领域筛选书籍">
-    <button type="button" class="kb-filter__chip is-on" data-domain="*" aria-pressed="true">全部</button>
-    {{- range $domains }}
-    <button type="button" class="kb-filter__chip" data-domain="{{ . }}" aria-pressed="false">{{ . }}</button>
-    {{- end }}
-  </div>
-  {{- end }}
-
-  <div class="kb-shelf-bar">
-    <p class="kb-shelf__hint">点开封面进入一本书。每本书有自己的地图、笔记与标签。</p>
-    <div class="kb-shelf__nav" data-shelf-nav hidden>
-      <button type="button" data-shelf-dir="-1" aria-label="向左滑动书架">‹</button>
-      <button type="button" data-shelf-dir="1" aria-label="向右滑动书架">›</button>
-    </div>
-  </div>
-
   <div class="kb-shelf-wrap">
     <div class="kb-shelf" data-shelf>
       {{- range $i, $b := $books }}
@@ -52,32 +29,52 @@
             <span class="kb-book__author">{{ $b.Params.author | default site.Params.author }}</span>
           </span>
         </span>
-        <span class="kb-book__meta">
-          <span class="kb-book__name">{{ $b.Title }}</span>
-          <span class="kb-book__count">{{ len $b.RegularPages }} 篇</span>
-        </span>
       </a>
       {{- end }}
     </div>
     <span class="kb-shelf__plank" aria-hidden="true"></span>
   </div>
+
+  <div class="kb-shelf-foot" data-shelf-foot hidden>
+    <button type="button" data-shelf-dir="-1" aria-label="向左滑动">‹</button>
+    <span class="kb-shelf__swipe">可滑动</span>
+    <button type="button" data-shelf-dir="1" aria-label="向右滑动">›</button>
+  </div>
+
+  {{- if gt (len $domains) 1 }}
+  <div class="kb-filter" role="group" aria-label="按领域筛选书籍">
+    <button type="button" class="kb-filter__chip is-on" data-domain="*" aria-pressed="true">全部</button>
+    {{- range $domains }}
+    <button type="button" class="kb-filter__chip" data-domain="{{ . }}" aria-pressed="false">{{ . }}</button>
+    {{- end }}
+  </div>
+  {{- end }}
   {{- else }}
-  <p class="kb-empty">书架还是空的。在 <code>content/</code> 下新建一个目录并放入 <code>_index.md</code>，它就是一本新书。</p>
+  <p class="kb-empty">书架还是空的。点右上角的加号，看看怎么放第一本书上去。</p>
   {{- end }}
 
-  {{- $recent := first 6 (sort $entries "Lastmod" "desc") -}}
-  {{- if $recent }}
-  <section class="kb-recent">
-    <h2>最近更新</h2>
-    <ul>
-      {{- range $recent }}
-      <li>
-        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-        <span class="kb-recent__book">{{ .CurrentSection.Title }}</span>
-      </li>
-      {{- end }}
-    </ul>
-  </section>
-  {{- end }}
+  <dialog class="kb-newbook" data-newbook-dialog aria-labelledby="kb-newbook-title">
+    <div class="kb-newbook__box">
+      <h2 id="kb-newbook-title">新建一本书</h2>
+      <p>本站是静态站点，书就是仓库里的一个目录，不能在这里直接写文件。三步：</p>
+      <ol>
+        <li>在 <code>content/</code> 下新建目录，目录名就是这本书的网址，例如 <code>thermal/</code>。</li>
+        <li>在目录里新建 <code>_index.md</code>，写入下面这份元数据。</li>
+        <li>提交推送，书架会自动多出一张封面。</li>
+      </ol>
+      <pre><code>---
+title: 新书的名字
+description: 一句话介绍这本书
+author: 你的名字
+domain: 领域名
+accent: "#2f6fed"
+weight: 20
+---</code></pre>
+      <div class="kb-newbook__act">
+        <a href="https://github.com/ice917/ice917.github.io/new/main/content" target="_blank" rel="noopener">去 GitHub 新建</a>
+        <button type="button" data-newbook-close>关闭</button>
+      </div>
+    </div>
+  </dialog>
 </div>
 {{- end }}

@@ -326,40 +326,6 @@
     margin-top: 10px;
 }
 
-/* ---------------------------------------------------------------- 首页最近更新 */
-
-.kb-recent {
-    margin: 26px 0 10px;
-}
-
-.kb-recent h2 {
-    margin: 0 0 8px;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: .02em;
-    color: var(--secondary);
-}
-
-.kb-recent ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.kb-recent li {
-    padding: 9px 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.kb-recent a {
-    text-decoration: none;
-}
-
-.kb-recent a:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-
 .kb-empty {
     margin: 18px 0;
     font-size: 14px;
@@ -488,51 +454,85 @@
 
 /* ---------------------------------------------------------------- 书架 */
 
-.kb-shelf-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 16px;
-    align-items: center;
-    justify-content: space-between;
-    margin: 18px 0 0;
+/* 标题居中，加号固定在右上角 */
+.kb-shelf-head {
+    position: relative;
+    margin: 6px 0 0;
+    text-align: center;
 }
 
-.kb-shelf__hint {
+.kb-shelf-head h1 {
     margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+}
+
+.kb-shelf-add {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--secondary);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.kb-shelf-add:hover {
+    color: var(--kb-note);
+    border-color: var(--kb-note);
+}
+
+.kb-shelf-add:focus-visible {
+    outline: 2px solid var(--kb-note);
+    outline-offset: 2px;
+}
+
+/* 书封下方：可滑动的提示与左右按钮，只有溢出时才出现 */
+.kb-shelf-foot {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin: 4px 0 0;
     font-size: 12px;
     color: var(--secondary);
 }
 
-.kb-shelf__nav {
-    display: flex;
-    gap: 6px;
-}
-
 /* [hidden] 的 UA 样式会被上面的 display:flex 盖掉，这里补回来 */
-.kb-shelf__nav[hidden] {
+.kb-shelf-foot[hidden] {
     display: none;
 }
 
-.kb-shelf__nav button {
-    width: 30px;
-    height: 30px;
+.kb-shelf-foot button {
+    width: 26px;
+    height: 26px;
     padding: 0;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1;
     color: var(--secondary);
-    background: var(--entry);
+    background: transparent;
     border: 1px solid var(--border);
     border-radius: 8px;
     cursor: pointer;
     transition: color .15s ease, border-color .15s ease;
 }
 
-.kb-shelf__nav button:hover {
+.kb-shelf-foot button:hover {
     color: var(--kb-note);
     border-color: var(--kb-note);
 }
 
-.kb-shelf__nav button:focus-visible {
+.kb-shelf-foot button:focus-visible {
     outline: 2px solid var(--kb-note);
     outline-offset: 2px;
 }
@@ -570,10 +570,10 @@
 /* 一排书封，横向滑动，像真的书架 */
 .kb-shelf-wrap {
     position: relative;
-    /* 书少时收窄到内容宽度，搁板就不会长得没边；书多时被 max-width 截住并横向滚动 */
+    /* 书少时收窄到内容宽度并居中，搁板就不会长得没边；书多时被 max-width 截住并横向滚动 */
     width: fit-content;
     max-width: 100%;
-    margin: 10px 0 8px;
+    margin: 26px auto 0;
 }
 
 .kb-shelf {
@@ -585,6 +585,10 @@
     scroll-behavior: smooth;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
+}
+
+.kb-shelf.is-centered {
+    justify-content: center;
 }
 
 .kb-shelf::-webkit-scrollbar {
@@ -689,36 +693,10 @@
     opacity: .82;
 }
 
-.kb-book__meta {
-    display: flex;
-    gap: 8px;
-    align-items: baseline;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--secondary);
-}
-
-.kb-book__name {
-    overflow: hidden;
-    font-weight: 600;
-    color: var(--primary);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    transition: color .15s ease;
-}
-
-.kb-book__count {
-    flex: 0 0 auto;
-}
-
 .kb-book:hover .kb-book__cover,
 .kb-book:focus-visible .kb-book__cover {
     transform: translateY(-4px) rotate(-.7deg);
     box-shadow: 0 20px 32px -16px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 255, 255, .2);
-}
-
-.kb-book:hover .kb-book__name {
-    color: var(--kb-note);
 }
 
 .kb-book:focus-visible {
@@ -778,20 +756,76 @@
     color: var(--secondary);
 }
 
-.kb-recent li {
-    display: flex;
-    gap: 10px;
-    align-items: baseline;
-    justify-content: space-between;
+/* ---------------------------------------------------------------- 新建书说明 */
+
+.kb-newbook {
+    max-width: min(560px, calc(100vw - 32px));
+    padding: 0;
+    color: var(--primary);
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 12px;
 }
 
-.kb-recent__book {
-    flex: 0 0 auto;
-    padding: 1px 8px;
-    font-size: 11px;
+.kb-newbook::backdrop {
+    background: rgba(0, 0, 0, .55);
+}
+
+.kb-newbook__box {
+    padding: 20px 22px;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.kb-newbook__box h2 {
+    margin: 0 0 8px;
+    font-size: 17px;
+}
+
+.kb-newbook__box p,
+.kb-newbook__box ol {
+    margin: 0 0 12px;
     color: var(--secondary);
+}
+
+.kb-newbook__box ol {
+    padding-left: 20px;
+}
+
+.kb-newbook__box pre {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.6;
+    background: var(--code-bg);
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: 8px;
+}
+
+.kb-newbook__act {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.kb-newbook__act a,
+.kb-newbook__act button {
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--primary);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.kb-newbook__act a:hover,
+.kb-newbook__act button:hover {
+    color: var(--kb-note);
+    border-color: var(--kb-note);
 }
 
 @media (max-width: 640px) {
@@ -809,6 +843,16 @@
 
     .kb-shelf {
         gap: 14px;
+    }
+
+    .kb-shelf-head h1 {
+        font-size: 22px;
+    }
+
+    .kb-shelf-add {
+        width: 30px;
+        height: 30px;
+        font-size: 19px;
     }
 
     .kb-book {
