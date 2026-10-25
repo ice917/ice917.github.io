@@ -68,19 +68,17 @@
           {{- end -}}
         {{- end -}}
         <a class="kb-book" href="{{ $b.RelPermalink }}" data-domain="{{ $domain }}" data-title="{{ $b.Title }}" style="--book-accent: {{ $accent }};">
-          {{- if $coverURL }}
-          <span class="kb-book__cover kb-book__cover--image">
-            <img class="kb-book__img" src="{{ $coverURL }}" alt="" loading="lazy" decoding="async">
-          </span>
-          {{- else }}
-          <span class="kb-book__cover">
-            <span class="kb-book__domain">{{ $domain }}</span>
-            <span class="kb-book__lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-          </span>
-          {{- end }}
-          <span class="kb-book__name">
-            <span class="kb-book__title">{{ $b.Title }}</span>
-            <span class="kb-book__author">{{ $b.Params.author | default site.Params.author }}</span>
+          <span class="kb-book__cover{{ if $coverURL }} kb-book__cover--image{{ end }}">
+            {{- with $coverURL }}
+            <img class="kb-book__img" src="{{ . }}" alt="" loading="lazy" decoding="async">
+            {{- end }}
+            <span class="kb-book__face">
+              <span class="kb-book__domain">{{ $domain }}</span>
+              <span class="kb-book__name">
+                <span class="kb-book__title">{{ $b.Title }}</span>
+                <span class="kb-book__author">{{ $b.Params.author | default site.Params.author }}</span>
+              </span>
+            </span>
           </span>
         </a>
         {{- end }}

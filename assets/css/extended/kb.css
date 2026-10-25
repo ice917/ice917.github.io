@@ -9,17 +9,12 @@
     --kb-tag: #b4762a;
     --kb-shadow: 0 1px 2px rgba(0, 0, 0, .05), 0 10px 28px rgba(0, 0, 0, .07);
     --kb-radius: 14px;
-    /* 书封缩略图当作纸页：浅色主题是白纸，深色主题是略亮于背景的深灰纸 */
-    --kb-paper: #fff;
-    --kb-paper-ink: rgba(0, 0, 0, .13);
 }
 
 :root[data-theme="dark"] {
     --kb-note: #6ea8ff;
     --kb-tag: #e0b062;
     --kb-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px rgba(0, 0, 0, .45);
-    --kb-paper: #26272c;
-    --kb-paper-ink: rgba(255, 255, 255, .13);
 }
 
 /* 书架、书页面与全图都需要更宽的画布 */
@@ -652,7 +647,6 @@ body:has(.kb-shelf-page) .main {
 .kb-book {
     display: flex;
     flex-direction: column;
-    gap: 9px;
     min-width: 0;
     color: inherit;
     text-decoration: none;
@@ -663,134 +657,129 @@ body:has(.kb-shelf-page) .main {
     display: none;
 }
 
-/* 一张白纸：顶部色条代替书脊，用来标记领域 */
+/* 一本立体的书：顶部打光、左侧书脊压暗、底部压暗保证白字可读 */
 .kb-book__cover {
     position: relative;
     display: flex;
     flex-direction: column;
     aspect-ratio: 3 / 4;
-    padding: 11px 12px 12px;
+    padding: 13px 16px 15px;
     overflow: hidden;
-    background: var(--kb-paper);
-    border: 1px solid var(--border);
-    border-top: 4px solid var(--book-accent, var(--kb-note));
-    border-radius: 5px;
-    box-shadow: 0 10px 20px -18px rgba(0, 0, 0, .6);
-    transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    color: #fff;
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, .26) 0%, rgba(0, 0, 0, 0) 24%),
+        linear-gradient(0deg, rgba(0, 0, 0, .55) 0%, rgba(0, 0, 0, .14) 36%, rgba(0, 0, 0, 0) 66%),
+        linear-gradient(155deg, rgba(255, 255, 255, .26) 0%, rgba(255, 255, 255, 0) 48%),
+        var(--book-accent, var(--kb-note));
+    border-radius: 3px 6px 6px 3px;
+    box-shadow:
+        inset 9px 0 13px -11px rgba(0, 0, 0, .9),
+        inset 1px 0 0 rgba(255, 255, 255, .18),
+        0 12px 20px -16px rgba(0, 0, 0, .7);
+    transition: transform .16s ease, box-shadow .16s ease;
+}
+
+/* 封面比书页窄一点，右侧露出一条白边 */
+.kb-book__cover::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: 0;
+    bottom: 3px;
+    width: 4px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, .85));
+    border-radius: 0 2px 2px 0;
+    pointer-events: none;
+}
+
+/* 封面内容：领域名在左上，书名与作者在左下 */
+.kb-book__face {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .3);
 }
 
 .kb-book__domain {
     overflow: hidden;
     font-size: 9px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.4;
-    letter-spacing: .12em;
-    color: var(--secondary);
+    letter-spacing: .16em;
+    color: rgba(255, 255, 255, .8);
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-/* 有真实封面图时：图铺满卡片，不再画纸页 */
-.kb-book__cover--image {
-    padding: 0;
-    background: var(--entry);
-}
-
-.kb-book__img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* 纸上的假文字行，纯视觉，不进读屏 */
-.kb-book__lines {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 15px;
-}
-
-.kb-book__lines i {
-    height: 4px;
-    background: var(--kb-paper-ink);
-    border-radius: 2px;
-}
-
-.kb-book__lines i:nth-child(1) {
-    width: 100%;
-}
-
-.kb-book__lines i:nth-child(2) {
-    width: 92%;
-}
-
-.kb-book__lines i:nth-child(3) {
-    width: 96%;
-}
-
-.kb-book__lines i:nth-child(4) {
-    width: 74%;
-}
-
-.kb-book__lines i:nth-child(5) {
-    width: 88%;
-}
-
-.kb-book__lines i:nth-child(6) {
-    width: 62%;
-}
-
-.kb-book__lines i:nth-child(7) {
-    width: 94%;
-}
-
-.kb-book__lines i:nth-child(8) {
-    width: 80%;
-}
-
-.kb-book__lines i:nth-child(9) {
-    width: 54%;
-}
-
-.kb-book__lines i:nth-child(10) {
-    width: 34%;
-}
-
-/* 文件名一样：缩略图下方居中，最多两行 */
 .kb-book__name {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    text-align: center;
+    gap: 7px;
+    min-width: 0;
 }
 
 .kb-book__title {
     display: -webkit-box;
     overflow: hidden;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
-    line-height: 1.45;
+    line-height: 1.3;
     word-break: break-word;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
 }
 
 .kb-book__author {
+    display: block;
     overflow: hidden;
-    font-size: 11px;
-    line-height: 1.4;
-    color: var(--secondary);
+    font-size: 10.5px;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, .82);
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+/* 书名与作者之间那道短白线 */
+.kb-book__author::before {
+    content: "";
+    display: block;
+    width: 26px;
+    height: 1px;
+    margin-bottom: 7px;
+    background: rgba(255, 255, 255, .5);
+}
+
+/* 有真实封面图时：图铺满封面，字压在图上 */
+.kb-book__cover--image {
+    padding: 0;
+    background: var(--entry);
+}
+
+.kb-book__img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kb-book__cover--image .kb-book__face {
+    padding: 13px 16px 15px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, .34) 0%, rgba(0, 0, 0, 0) 26%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, .76) 100%);
 }
 
 .kb-book:hover .kb-book__cover,
 .kb-book:focus-visible .kb-book__cover {
     transform: translateY(-3px);
-    border-color: var(--book-accent, var(--kb-note));
-    box-shadow: 0 16px 26px -20px rgba(0, 0, 0, .7);
+    box-shadow:
+        inset 9px 0 13px -11px rgba(0, 0, 0, .9),
+        inset 1px 0 0 rgba(255, 255, 255, .18),
+        0 20px 26px -18px rgba(0, 0, 0, .8);
 }
 
 .kb-book:focus-visible {
@@ -814,7 +803,7 @@ body:has(.kb-shelf-page) .main {
     position: sticky;
     top: 18px;
     display: flex;
-    flex: 0 0 336px;
+    flex: 0 0 560px;
     flex-direction: column;
     align-self: flex-start;
     min-height: 0;
@@ -876,7 +865,7 @@ body:has(.kb-shelf-page) .main {
     position: absolute;
     top: 0;
     left: 0;
-    width: 336px;
+    width: 560px;
     visibility: hidden;
     pointer-events: none;
 }
@@ -1122,8 +1111,10 @@ body:has(.kb-shelf-page) .main {
     border-color: var(--kb-note);
 }
 
-/* 窄屏放不下两栏：侧栏落到书架下方，恢复正常文档流 */
-@media (max-width: 900px) {
+/* 窄屏放不下两栏：侧栏落到书架下方，恢复正常文档流。
+   侧栏 560px + 书架两列 310px + 间距 30px + 左右留白 48px = 948px，
+   再窄就会把书架压成一列，所以在 950px 收掉两栏。 */
+@media (max-width: 950px) {
     .kb-shelf-body {
         display: block;
     }
@@ -1200,11 +1191,20 @@ body:has(.kb-shelf-page) .main {
     }
 
     .kb-book__cover {
-        padding: 9px 10px 10px;
+        padding: 11px 13px 13px;
+    }
+
+    /* 真封面图必须去掉内边距，否则绝对定位的图会被缩进去 */
+    .kb-book__cover--image {
+        padding: 0;
+    }
+
+    .kb-book__cover--image .kb-book__face {
+        padding: 11px 13px 13px;
     }
 
     .kb-book__title {
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .kb-book__domain {
