@@ -69,6 +69,7 @@
         {{- end -}}
         <a class="kb-book" href="{{ $b.RelPermalink }}" data-domain="{{ $domain }}" data-title="{{ $b.Title }}" style="--book-accent: {{ $accent }};">
           <span class="kb-book__cover{{ if $coverURL }} kb-book__cover--image{{ end }}">
+            <span class="kb-book__spine" aria-hidden="true"></span>
             {{- with $coverURL }}
             <img class="kb-book__img" src="{{ . }}" alt="" loading="lazy" decoding="async">
             {{- end }}

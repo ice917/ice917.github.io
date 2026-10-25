@@ -2,10 +2,13 @@
    霍格沃兹彩蛋 —— 只有在 <html data-egg="hogwarts"> 时才生效
    未激活时整个文件对页面零影响（所有规则都以 :root[data-egg=...] 或 .hk-cer 开头）。
 
-   两套皮肤，跟随 PaperMod 自己的 data-theme，不另造开关：
-     data-theme != dark → 羊皮纸日（墨褐字 #2B2018 on #EFE3C6 = 12.46:1）
-     data-theme == dark → 烛光夜（羊皮纸白 #E8DCC0 on #14100D = 13.9:1）
-   学院色只做点缀（描边、引文线、印章），正文与标题一律走 --primary/--content。
+   换的不只是颜色与字体：书脊、烫金横带、书口毛边、木隔板、首字下沉、
+   花饰分隔、羊皮卷轴侧栏 —— 七处版式结构一起换。
+   四院靠三件事分开：纸底色的色相、专属底纹（格纹 / 蛇鳞 / 星图 / 麦垄）、饰线色。
+
+   两套皮肤跟随 PaperMod 自己的 data-theme，不另造开关：
+     data-theme != dark → 羊皮纸日（正文/纸 11.52–11.57:1）
+     data-theme == dark → 烛光夜（正文/纸 13.40–13.42:1）
    ========================================================================== */
 
 /* Cinzel 的 latin 子集，OFL 授权，取自 Google Fonts v26。
@@ -26,92 +29,242 @@
     src: url("/fonts/cinzel-latin.woff2") format("woff2");
 }
 
+/* ------------------------------- 调色板 · 羊皮纸日（同时是格兰芬多的亮色默认值）
+   每个色值都由二分法反解得到，不是手调的：
+     卡片/纸 1.226–1.235 · 纸/三级色 1.62–1.69 · 正文/纸 11.52–11.57
+     内容/纸 9.61–9.66 · 次级文字/纸 4.80（≥4.5）· 饰线/纸 5.03–8.00
+   四院纸色只换色相不换亮度（两两亮度比 1.007–1.125），换院不改变可读性。 */
 :root[data-egg="hogwarts"] {
     /* 标题用铭文体（Cinzel 无中日韩字形，汉字自动落到宋体系）；
        正文仍用衬线，但不用 Cinzel，否则整段拉丁文会变成小型大写字母 */
     --hk-display: "Cinzel", Georgia, "Songti SC", "STSong", "SimSun", serif;
     --hk-serif: Georgia, "Times New Roman", "Songti SC", "STSong", "SimSun", serif;
 
-    /* 金线：亮色下 #D8B14A 只有 1.6:1，只能用在暗色；
-       亮色改用 #A8791E（3.04:1），够做描边与分隔线，但不做文字色 */
-    --hk-gold: #a8791e;
-    --hk-gold-soft: rgba(168, 121, 30, .38);
+    --theme: #ecd3cd;
+    --entry: #f7ece9;
+    --tertiary: #bca698;
+    --border: #dec7c1;
+    --code-bg: #e3cac5;
+    --code-block-bg: #241b14;
+    --primary: #241e1b;
+    --content: #352c24;
+    --secondary: #66584d;
 
-    --hk-deep: #7f0909;
-    --hk-bright: #d3a625;
-    --hk-accent: var(--hk-deep);
+    --hk-accent: #8e3a38;
+    --hk-accent-rgb: 142, 58, 56;
+    --hk-tint: #e3c4bf;
+    --hk-metal-rgb: 211, 166, 37;
+
+    /* 饰线 = 学院色 42%，烫金带 = 金属色 74%，内框 = 金属色 42%；
+       都从上面两支 RGB 派生，四院改 RGB 即自动跟随 */
+    --hk-rule: rgba(var(--hk-accent-rgb), .42);
+    --hk-band: rgba(var(--hk-metal-rgb), .74);
+    --hk-frame: rgba(var(--hk-metal-rgb), .42);
+
+    /* 底纹固定两层，与 --hk-glow 的两层拼成恒定 4 层（见下面“纸面”一节） */
+    --hk-motif:
+        repeating-linear-gradient(90deg, transparent 0 45px, var(--hk-tint) 45px 46px),
+        repeating-linear-gradient(180deg, transparent 0 45px, var(--hk-tint) 45px 46px);
+    --hk-motif-size: auto, auto;
+    --hk-motif-pos: 0 0, 0 0;
 
     --hk-glow:
-        radial-gradient(1100px 620px at 50% -6%, rgba(255, 249, 228, .85) 0%, rgba(255, 249, 228, 0) 62%),
-        radial-gradient(900px 520px at 50% 104%, rgba(120, 84, 30, .12) 0%, rgba(120, 84, 30, 0) 60%);
-
-    /* 羊皮纸日 */
-    --theme: #efe3c6;
-    --entry: #f8f0de;
-    --primary: #2b2018;
-    --secondary: #6a5844;
-    --tertiary: #d6c4a0;
-    --content: #3a2c20;
-    --code-bg: #e6d7b5;
-    --code-block-bg: #241b14;
-    --border: #dacaa7;
+        radial-gradient(1100px 620px at 50% -6%, rgba(255, 249, 228, .55) 0%, rgba(255, 249, 228, 0) 62%),
+        radial-gradient(900px 520px at 50% 104%, rgba(120, 84, 30, .10) 0%, rgba(120, 84, 30, 0) 60%);
 
     /* 知识地图的 Canvas 也读这两个变量（kb-graph.js 的 palette()），
-       所以图谱节点/连线会跟着学院走；tag 用墨褐，避免与学院色糊在一起 */
+       所以图谱节点/连线会跟着学院走；tag 直接跟随次级文字色 */
     --kb-note: var(--hk-accent);
-    --kb-tag: #6a5844;
+    --kb-tag: var(--secondary);
 
-    --kb-shadow: 0 1px 2px rgba(43, 32, 24, .06), 0 10px 28px rgba(43, 32, 24, .10);
     color-scheme: light;
 }
 
+/* ------------------------------- 调色板 · 烛光夜（同时是格兰芬多的暗色默认值）
+   暗色下卡片比纸亮，所以“最差背景”是卡片：次级文字对卡片 4.80–4.84。 */
 :root[data-egg="hogwarts"][data-theme="dark"] {
-    --hk-gold: #d8b14a;
-    --hk-gold-soft: rgba(216, 177, 74, .34);
-    --hk-accent: var(--hk-bright);
+    --theme: #170d0a;
+    --entry: #2b221f;
+    --tertiary: #45382c;
+    --border: #2c221d;
+    --code-bg: #281e19;
+    --code-block-bg: #0d0a07;
+    --primary: #e1d7c5;
+    --content: #cfc4ac;
+    --secondary: #9d8d76;
+
+    --hk-accent: #d3a625;
+    --hk-accent-rgb: 211, 166, 37;
+    --hk-tint: #33230e;
+    --hk-metal-rgb: 211, 166, 37;
+
+    --hk-motif:
+        repeating-linear-gradient(90deg, transparent 0 45px, var(--hk-tint) 45px 46px),
+        repeating-linear-gradient(180deg, transparent 0 45px, var(--hk-tint) 45px 46px);
+    --hk-motif-size: auto, auto;
+    --hk-motif-pos: 0 0, 0 0;
 
     --hk-glow:
-        radial-gradient(1100px 620px at 50% -6%, rgba(216, 177, 74, .14) 0%, rgba(216, 177, 74, 0) 60%),
-        radial-gradient(760px 460px at 50% 108%, rgba(160, 82, 24, .12) 0%, rgba(160, 82, 24, 0) 62%);
+        radial-gradient(1100px 620px at 50% -6%, rgba(var(--hk-metal-rgb), .10) 0%, rgba(var(--hk-metal-rgb), 0) 60%),
+        radial-gradient(760px 460px at 50% 108%, rgba(160, 82, 24, .10) 0%, rgba(160, 82, 24, 0) 62%);
 
-    /* 烛光夜 */
-    --theme: #14100d;
-    --entry: #1f1913;
-    --primary: #e8dcc0;
-    --secondary: #a5947a;
-    --tertiary: #3b3126;
-    --content: #d9ccb0;
-    --code-bg: #1b1610;
-    --code-block-bg: #0d0a07;
-    --border: #332a20;
     /* 必须在这里重复声明：kb.css 里 :root[data-theme="dark"] 与本文件的基础块同为 (0,2,0)，
        而 kb.css 排在本文件之后，基础块里那条会被它盖掉（实测 --kb-note 曾回落到 #6ea8ff） */
     --kb-note: var(--hk-accent);
-    --kb-tag: #a5947a;   /* 暗色下 tag 走次级色，#a5947a on #14100D = 6.41:1；学院亮色留给节点 */
-    --kb-shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 10px 28px rgba(0, 0, 0, .55);
+    --kb-tag: var(--secondary);
+
     color-scheme: dark;
 }
 
-/* 四院：只给深/亮两支原色，映到 --hk-accent 的规则按明暗各取一支 */
-:root[data-egg="hogwarts"][data-house="gryffindor"] { --hk-deep: #7f0909; --hk-bright: #d3a625; }
-:root[data-egg="hogwarts"][data-house="slytherin"]  { --hk-deep: #1a472a; --hk-bright: #bfc9be; }
-:root[data-egg="hogwarts"][data-house="ravenclaw"]  { --hk-deep: #0e1a40; --hk-bright: #c0a16b; }
-:root[data-egg="hogwarts"][data-house="hufflepuff"] { --hk-deep: #5c4210; --hk-bright: #ecb939; }
+/* ------------------------------- 四院 · 纸色 + 纹样 + 饰线
+   格兰芬多的亮/暗两套＝上面两个默认块（正交格纹），这里不再重复。
+   其余三院各写亮、暗两块；:not([data-theme="dark"]) 与 [data-theme="dark"]
+   同为 (0,4,0) 且互斥，不会互相盖。 */
+
+/* 斯莱特林 · 半错位蛇鳞 */
+:root[data-egg][data-house="slytherin"]:not([data-theme="dark"]) {
+    --theme: #d5e2d5;
+    --entry: #f2f6f2;
+    --tertiary: #b2b09e;
+    --border: #c9d5c9;
+    --code-bg: #cdd9cd;
+    --primary: #272421;
+    --content: #383028;
+    --secondary: #655d51;
+    --hk-accent: #2f5c43;
+    --hk-accent-rgb: 47, 92, 67;
+    --hk-tint: #c6d5c7;
+    --hk-metal-rgb: 191, 201, 190;
+    --hk-motif:
+        radial-gradient(circle at 50% 0%, transparent 6.4px, var(--hk-tint) 6.4px 7.4px, transparent 7.4px),
+        radial-gradient(circle at 50% 0%, transparent 6.4px, var(--hk-tint) 6.4px 7.4px, transparent 7.4px);
+    --hk-motif-size: 14px 7px, 14px 7px;
+    --hk-motif-pos: 0 0, 7px 3.5px;
+}
+
+/* 拉文克劳 · 双密度星点 */
+:root[data-egg][data-house="ravenclaw"]:not([data-theme="dark"]) {
+    --theme: #d5dbec;
+    --entry: #eff1f8;
+    --tertiary: #b1acaa;
+    --border: #c9cede;
+    --code-bg: #cdd2e3;
+    --primary: #252120;
+    --content: #362e28;
+    --secondary: #635b54;
+    --hk-accent: #2a3a66;
+    --hk-accent-rgb: 42, 58, 102;
+    --hk-tint: #c7cde1;
+    --hk-metal-rgb: 192, 161, 107;
+    --hk-motif:
+        radial-gradient(circle, var(--hk-tint) 0 1px, transparent 1.4px),
+        radial-gradient(circle, var(--hk-tint) 0 .6px, transparent 1px);
+    --hk-motif-size: 31px 23px, 17px 13px;
+    --hk-motif-pos: 0 0, 9px 6px;
+}
+
+/* 赫奇帕奇 · 交叉麦垄 */
+:root[data-egg][data-house="hufflepuff"]:not([data-theme="dark"]) {
+    --theme: #efe5bd;
+    --entry: #fdfcf6;
+    --tertiary: #c2b494;
+    --border: #e2d8b2;
+    --code-bg: #e6dcb6;
+    --primary: #2d2822;
+    --content: #3e3429;
+    --secondary: #6c614f;
+    --hk-accent: #7a5a18;
+    --hk-accent-rgb: 122, 90, 24;
+    --hk-tint: #e3d6ac;
+    --hk-metal-rgb: 236, 185, 57;
+    --hk-motif:
+        repeating-linear-gradient(14deg, transparent 0 13px, var(--hk-tint) 13px 14px),
+        repeating-linear-gradient(-14deg, transparent 0 13px, var(--hk-tint) 13px 14px);
+    --hk-motif-size: auto, auto;
+    --hk-motif-pos: 0 0, 0 0;
+}
+
+/* 斯莱特林 · 烛光夜 */
+:root[data-egg][data-house="slytherin"][data-theme="dark"] {
+    --theme: #0a120e;
+    --entry: #1e2622;
+    --tertiary: #403a2e;
+    --border: #1f2620;
+    --code-bg: #1c221d;
+    --primary: #e1d8c6;
+    --content: #cfc5ad;
+    --secondary: #9a8e77;
+    --hk-accent: #9fc3a8;
+    --hk-accent-rgb: 159, 195, 168;
+    --hk-tint: #1e2922;
+    --hk-metal-rgb: 191, 201, 190;
+    --hk-motif:
+        radial-gradient(circle at 50% 0%, transparent 6.4px, var(--hk-tint) 6.4px 7.4px, transparent 7.4px),
+        radial-gradient(circle at 50% 0%, transparent 6.4px, var(--hk-tint) 6.4px 7.4px, transparent 7.4px);
+    --hk-motif-size: 14px 7px, 14px 7px;
+    --hk-motif-pos: 0 0, 7px 3.5px;
+}
+
+/* 拉文克劳 · 烛光夜 */
+:root[data-egg][data-house="ravenclaw"][data-theme="dark"] {
+    --theme: #090d1b;
+    --entry: #1f232f;
+    --tertiary: #3f3834;
+    --border: #1f222d;
+    --code-bg: #1c1f2a;
+    --primary: #ded6c6;
+    --content: #cdc3ad;
+    --secondary: #9a8d79;
+    --hk-accent: #a8b6da;
+    --hk-accent-rgb: 168, 182, 218;
+    --hk-tint: #1f2536;
+    --hk-metal-rgb: 192, 161, 107;
+    --hk-motif:
+        radial-gradient(circle, var(--hk-tint) 0 1px, transparent 1.4px),
+        radial-gradient(circle, var(--hk-tint) 0 .6px, transparent 1px);
+    --hk-motif-size: 31px 23px, 17px 13px;
+    --hk-motif-pos: 0 0, 9px 6px;
+}
+
+/* 赫奇帕奇 · 烛光夜 */
+:root[data-egg][data-house="hufflepuff"][data-theme="dark"] {
+    --theme: #1a1607;
+    --entry: #2c281a;
+    --tertiary: #483c2c;
+    --border: #2c2818;
+    --code-bg: #292515;
+    --primary: #e7ddca;
+    --content: #d4c9b0;
+    --secondary: #a19278;
+    --hk-accent: #ecb939;
+    --hk-accent-rgb: 236, 185, 57;
+    --hk-tint: #332a0d;
+    --hk-metal-rgb: 236, 185, 57;
+    --hk-motif:
+        repeating-linear-gradient(14deg, transparent 0 13px, var(--hk-tint) 13px 14px),
+        repeating-linear-gradient(-14deg, transparent 0 13px, var(--hk-tint) 13px 14px);
+    --hk-motif-size: auto, auto;
+    --hk-motif-pos: 0 0, 0 0;
+}
 
 /* ------------------------------------------------------------------ 纸面 */
 
-/* .list 在 PaperMod 里自带 background: var(--code-bg)，必须一起改，否则列表页是另一张纸 */
+/* .list 在 PaperMod 里自带 background: var(--code-bg)，必须一起改，否则列表页是另一张纸。
+   图层恒定 4 层：--hk-glow 两层 + --hk-motif 两层。写 repeat/size/position/attachment
+   时必须凑满 4 个值，所以 --hk-motif-size 与 --hk-motif-pos 各自带一个逗号。 */
 :root[data-egg="hogwarts"] body,
 :root[data-egg="hogwarts"] .list {
     background-color: var(--theme);
-    background-image: var(--hk-glow);
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    background-image: var(--hk-glow), var(--hk-motif);
+    background-repeat: no-repeat, no-repeat, repeat, repeat;
+    background-size: auto, auto, var(--hk-motif-size);
+    background-position: 0 0, 0 0, var(--hk-motif-pos);
+    background-attachment: fixed, fixed, scroll, scroll;
 }
 
 :root[data-egg="hogwarts"] ::selection {
     color: var(--primary);
-    background: rgba(216, 177, 74, .38);
+    background: rgba(var(--hk-metal-rgb), .38);
 }
 
 /* ------------------------------------------------------------------ 字 */
@@ -146,41 +299,223 @@
 
 /* ------------------------------------------------------------------ 线 */
 
-:root[data-egg="hogwarts"] .kb-shelf-head,
-:root[data-egg="hogwarts"] .post-header,
-:root[data-egg="hogwarts"] .kb-side,
-:root[data-egg="hogwarts"] .footer,
-:root[data-egg="hogwarts"] .kb-shelf-tools {
-    border-color: var(--hk-gold-soft);
-}
-
 :root[data-egg="hogwarts"] .md-content blockquote {
     border-inline-start-color: var(--hk-accent);
 }
 
-:root[data-egg="hogwarts"] .md-content hr {
-    height: 1px;
-    background: var(--hk-gold-soft);
-}
-
 :root[data-egg="hogwarts"] .md-content a:not(.anchor) {
-    text-decoration-color: var(--hk-gold);
+    text-decoration-color: var(--hk-accent);
     text-underline-offset: 3px;
 }
 
-/* 书封烫金内框：只画一圈 1px 线，不碰现有立体阴影与白边 */
-:root[data-egg="hogwarts"] .kb-book__cover::before {
+/* 文章标题下面本来没有线，这里补一道从学院色渐隐的饰线 */
+:root[data-egg="hogwarts"] .post-header::after {
     content: "";
+    display: block;
+    height: 1px;
+    margin-top: 14px;
+    background: linear-gradient(90deg, var(--hk-rule), transparent 78%);
+}
+
+/* 花饰分隔：原来是 2px 灰线，现在是“细线—❦—细线” */
+:root[data-egg="hogwarts"] .md-content hr {
+    height: 1.4em;
+    margin: 34px 0;
+    border: 0;
+    background:
+        linear-gradient(90deg,
+            transparent 0 4%,
+            var(--hk-rule) 4% 43%,
+            transparent 43% 57%,
+            var(--hk-rule) 57% 96%,
+            transparent 96%) center / 100% 1px no-repeat;
+    overflow: visible;
+    text-align: center;
+}
+
+:root[data-egg="hogwarts"] .md-content hr::before {
+    content: "❦";
+    display: block;
+    font-size: 13px;
+    line-height: 1.4em;
+    color: var(--hk-accent);
+}
+
+/* 正文首字下沉：正文第一段的首字改用铭文体并放大到 3 倍行高 */
+:root[data-egg="hogwarts"] .md-content > p:first-of-type::first-letter {
+    float: left;
+    margin: .04em .12em 0 0;
+    font-family: var(--hk-display);
+    font-weight: 600;
+    font-size: 3.05em;
+    line-height: .86;
+    color: var(--hk-accent);
+}
+
+/* ------------------------------------------------ 书架：书脊 / 烫金带 / 毛边 / 木隔板 */
+
+/* 书脊：16px 的圆柱，两侧压暗中间提亮，上端三道烫金横带 */
+:root[data-egg="hogwarts"] .kb-book__spine {
     position: absolute;
-    inset: 4px;
+    inset: 0 auto 0 0;
     z-index: 2;
-    border: 1px solid rgba(216, 177, 74, .42);
-    border-radius: 2px 4px 4px 2px;
+    width: 16px;
+    border-radius: 2px 0 0 2px;
+    background:
+        linear-gradient(180deg,
+            rgba(var(--hk-metal-rgb), 0) 0 15%,
+            var(--hk-band) 15% 17.4%,
+            rgba(var(--hk-metal-rgb), 0) 17.4% 18.8%,
+            var(--hk-band) 18.8% 21.2%,
+            rgba(var(--hk-metal-rgb), 0) 21.2% 22.6%,
+            var(--hk-band) 22.6% 25%,
+            rgba(var(--hk-metal-rgb), 0) 25%),
+        linear-gradient(90deg, rgba(0, 0, 0, .42) 0%, rgba(255, 255, 255, .18) 58%, rgba(0, 0, 0, .26) 100%);
     pointer-events: none;
 }
 
+/* 书封皮革：与纸色同族的低饱和深色，不随明暗翻转，一套值两套主题共用。
+   白字（15px 书名）对皮革 9.0–12.5:1；皮革之上的顶部压暗从 .26 提到 .34，
+   是为了让 9px 的领域名（rgba(255,255,255,.8)）在左上高光区也稳过 4.5:1。 */
+:root[data-egg="hogwarts"] { --hk-leather: #6a2323; }
+:root[data-egg="hogwarts"][data-house="slytherin"] { --hk-leather: #1f3b2f; }
+:root[data-egg="hogwarts"][data-house="ravenclaw"] { --hk-leather: #233355; }
+:root[data-egg="hogwarts"][data-house="hufflepuff"] { --hk-leather: #5c4520; }
+
+/* 封面文字让开书脊；真封面图仍然铺满，只把文字层推进去 */
+:root[data-egg="hogwarts"] .kb-book__cover {
+    padding-left: 27px;
+    border-radius: 2px 5px 5px 2px;
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, .34) 0%, rgba(0, 0, 0, 0) 26%),
+        linear-gradient(0deg, rgba(0, 0, 0, .55) 0%, rgba(0, 0, 0, .14) 36%, rgba(0, 0, 0, 0) 66%),
+        linear-gradient(155deg, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 48%),
+        var(--hk-leather);
+}
+
+/* 有真封面图的书不套皮革：上面的 .kb-book__cover 规则比 --image 更具体，
+   必须在这里把底色还原，否则图未加载时会透出皮革色 */
+:root[data-egg="hogwarts"] .kb-book__cover--image {
+    padding-left: 0;
+    background: var(--entry);
+}
+
+:root[data-egg="hogwarts"] .kb-book__cover--image .kb-book__face {
+    padding: 13px 16px 15px 27px;
+}
+
+/* 烫金内框：从书脊右侧起画，不压在书脊上 */
+:root[data-egg="hogwarts"] .kb-book__cover::before {
+    content: "";
+    position: absolute;
+    inset: 4px 4px 4px 20px;
+    z-index: 2;
+    border: 1px solid var(--hk-frame);
+    border-radius: 1px 4px 4px 1px;
+    pointer-events: none;
+}
+
+/* 右侧书口：一个 5px 的书页厚度块，不是一条明暗相间的梳子。
+   底下一层是自左向右的厚度渐变（暗→纸白→灰），上面只叠 5px 一条很淡的页缝；
+   明暗反差压到 .20，封面最窄 128px 时也不会读成条码。 */
+:root[data-egg="hogwarts"] .kb-book__cover::after {
+    top: 3px;
+    right: 0;
+    bottom: 3px;
+    width: 5px;
+    background:
+        repeating-linear-gradient(180deg,
+            rgba(0, 0, 0, 0) 0 4px,
+            rgba(120, 100, 78, .20) 4px 5px),
+        linear-gradient(90deg,
+            rgba(120, 96, 72, .34) 0,
+            rgba(250, 244, 230, .92) 38%,
+            rgba(212, 198, 170, .58) 100%);
+    border-radius: 0 2px 2px 0;
+    box-shadow: inset 1px 0 0 rgba(0, 0, 0, .26);
+}
+
+/* 每本书下面一块木隔板，左右各探出 9px，把书真正“架”起来 */
+:root[data-egg="hogwarts"] .kb-book {
+    position: relative;
+    padding-bottom: 16px;
+}
+
+:root[data-egg="hogwarts"] .kb-book::after {
+    content: "";
+    position: absolute;
+    left: -9px;
+    right: -9px;
+    bottom: 0;
+    height: 11px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #b98d5c 0%, #96683c 46%, #6f4a28 100%);
+    box-shadow: 0 2px 3px -1px rgba(0, 0, 0, .38);
+    pointer-events: none;
+}
+
+:root[data-egg="hogwarts"][data-theme="dark"] .kb-book::after {
+    background: linear-gradient(180deg, #6a4a2c 0%, #4a3220 46%, #2b1c11 100%);
+    box-shadow: 0 2px 3px -1px rgba(0, 0, 0, .7);
+}
+
+/* 侧栏：一张立在桌上的羊皮卷。纸面左右有卷曲暗边，上下各一根轴。
+   轴挂在 .kb-side 上（sticky 定位盒），否则会被 .kb-side__body 的滚动带走。 */
+:root[data-egg="hogwarts"] .kb-side__body {
+    padding: 18px 16px;
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, .13) 0, rgba(0, 0, 0, 0) 15px,
+            rgba(0, 0, 0, 0) calc(100% - 15px), rgba(0, 0, 0, .13) 100%),
+        var(--entry);
+    border: 1px solid var(--tertiary);
+    border-radius: 3px;
+    box-shadow:
+        inset 0 12px 16px -14px rgba(0, 0, 0, .55),
+        inset 0 -12px 16px -14px rgba(0, 0, 0, .55),
+        0 22px 40px -34px rgba(0, 0, 0, .6);
+}
+
+:root[data-egg="hogwarts"] .kb-side::before,
+:root[data-egg="hogwarts"] .kb-side::after {
+    content: "";
+    position: absolute;
+    right: -5px;
+    left: -5px;
+    z-index: 3;
+    height: 9px;
+    background: linear-gradient(180deg,
+        rgba(var(--hk-metal-rgb), .52) 0%,
+        rgba(var(--hk-metal-rgb), .22) 46%,
+        rgba(0, 0, 0, .30) 100%);
+    border-radius: 5px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 5px 9px -7px rgba(0, 0, 0, .8);
+    pointer-events: none;
+}
+
+:root[data-egg="hogwarts"] .kb-side::before { top: 30px; }
+:root[data-egg="hogwarts"] .kb-side::after { bottom: -5px; }
+
+:root[data-egg="hogwarts"] .kb-side.is-collapsed::before,
+:root[data-egg="hogwarts"] .kb-side.is-collapsed::after { display: none; }
+
+/* 留言区原来靠一条灰线上边，改成花饰起头 */
+:root[data-egg="hogwarts"] .kb-guestbook {
+    padding-top: 26px;
+    border-top: 0;
+}
+
+:root[data-egg="hogwarts"] .kb-guestbook::before {
+    content: "❦";
+    display: block;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1;
+    color: var(--hk-accent);
+    text-align: center;
+}
+
 :root[data-egg="hogwarts"] .kb-book:focus-visible .kb-book__cover {
-    outline-color: var(--hk-gold);
+    outline-color: var(--hk-accent);
 }
 
 /* ==========================================================================
