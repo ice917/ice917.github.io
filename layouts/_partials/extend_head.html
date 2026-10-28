@@ -30,7 +30,9 @@ try {
 {{- end -}}
 
 {{- /* "笔记"菜单项随书而变：在书内指向本书；在标签/归档等全局页回到最近读的那本书。
-       修的 bug：菜单里 /notes/ 写死，从《可验证支架》点"笔记"会跳到另一本《笔记》书。 */ -}}
+       修的 bug：菜单里 /notes/ 写死，从《可验证支架》点"笔记"会跳到另一本《笔记》书。
+       解析链（逐级兜底）：当前书路径 → localStorage → sessionStorage → referrer → 书架首页，
+       任何情况下都不再落到别的书。 */ -}}
 {{- $bookPaths := slice -}}
 {{- range site.Sections -}}{{- $bookPaths = $bookPaths | append .RelPermalink -}}{{- end -}}
 <script>
@@ -42,11 +44,21 @@ try {
   var target = current;
   if (target) {
     try { localStorage.setItem('kb-last-book', target); } catch (e) {}
+    try { sessionStorage.setItem('kb-last-book', target); } catch (e) {}
   } else {
     try { target = localStorage.getItem('kb-last-book') || ''; } catch (e) { target = ''; }
-    if (books.indexOf(target) < 0) target = '';
+    if (books.indexOf(target) < 0) {
+      try { target = sessionStorage.getItem('kb-last-book') || ''; } catch (e) { target = ''; }
+    }
+    if (books.indexOf(target) < 0 && document.referrer) {
+      try {
+        var ref = new URL(document.referrer).pathname;
+        books.forEach(function (b) { if (ref.indexOf(b) === 0) target = b; });
+      } catch (e) { target = ''; }
+    }
+    /* 无任何上下文时去书架选书，而不是跳到别的书 */
+    if (books.indexOf(target) < 0) target = '/';
   }
-  if (!target) return;
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('#menu a[href$="/notes/"]').forEach(function (a) {
       a.href = target;
