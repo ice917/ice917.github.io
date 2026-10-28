@@ -105,8 +105,31 @@
     border-color: var(--kb-note);
 }
 
+.kb-zoom {
+    display: inline-flex;
+    gap: 0;
+    flex: 0 0 auto;
+}
+
+.kb-zoom button {
+    border-radius: 0;
+    margin-left: -1px;
+}
+
+.kb-zoom button:first-child {
+    margin-left: 0;
+    border-radius: 8px 0 0 8px;
+}
+
+.kb-zoom button:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
 .kb-reset,
-.kb-lock {
+.kb-lock,
+.kb-zoom-in,
+.kb-zoom-out,
+.kb-zoom-fit {
     flex: 0 0 auto;
     padding: 7px 14px;
     font-size: 12px;
@@ -119,7 +142,10 @@
 }
 
 .kb-reset:hover,
-.kb-lock:hover {
+.kb-lock:hover,
+.kb-zoom-in:hover,
+.kb-zoom-out:hover,
+.kb-zoom-fit:hover {
     color: var(--kb-note);
     border-color: var(--kb-note);
 }

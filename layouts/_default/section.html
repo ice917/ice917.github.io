@@ -32,6 +32,11 @@
       <label class="kb-search">
         <input type="search" placeholder="搜索标题、标签、摘要…" aria-label="搜索地图节点">
       </label>
+      <div class="kb-zoom" role="group" aria-label="缩放地图">
+        <button type="button" class="kb-zoom-out" title="缩小">−</button>
+        <button type="button" class="kb-zoom-fit" title="适应全局">全局</button>
+        <button type="button" class="kb-zoom-in" title="放大">＋</button>
+      </div>
       <button type="button" class="kb-reset">复位</button>
       <button type="button" class="kb-lock" aria-pressed="false" title="锁定后可用手指拖动地图；解锁后页面可正常上下滑动">锁定地图</button>
     </div>
@@ -44,6 +49,7 @@
         <span><i class="kb-dot"></i>笔记</span>
         <span><i class="kb-dot kb-dot--tag"></i>标签</span>
         <span>实线＝互相引用，虚线＝标签归属</span>
+        <span>滚轮缩放 · 拖节点固定 · 双击空白看全局</span>
       </div>
       <span class="kb-status">正在加载…</span>
     </div>

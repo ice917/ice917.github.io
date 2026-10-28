@@ -186,7 +186,7 @@
     });
 
     var count = allNodes.length || 1;
-    var R = 42 * Math.sqrt(count);
+    var R = 28 * Math.sqrt(count);
     allNodes.forEach(function (n, i) {
       var a = (i / count) * Math.PI * 2;
       var jitter = 0.55 + ((i * 37) % 53) / 100;
@@ -214,10 +214,11 @@
     var links = this.links;
     if (!nodes.length) return;
 
-    var k = Math.sqrt((this.worldW * this.worldH) / nodes.length) * 0.62;
+    /* 理想间距系数与向心引力共同决定松紧：系数小 + 引力大 = 紧凑不散 */
+    var k = Math.sqrt((this.worldW * this.worldH) / nodes.length) * 0.42;
     var t = Math.max(this.temp, 0.35);
     var i, j, a, b, dx, dy, d2, d, f, ux, uy;
-    var gravity = 0.010;
+    var gravity = 0.024;
 
     for (var it = 0; it < iters; it++) {
       for (i = 0; i < nodes.length; i++) {
@@ -317,7 +318,8 @@
     var bw = Math.max(maxX - minX, 1) + pad * 2;
     var bh = Math.max(maxY - minY, 1) + pad * 2;
     var k = Math.min(this.width / bw, this.height / bh);
-    k = Math.max(0.22, Math.min(k, 1.9));
+    /* 下限必须足够低，否则布局稍散就永远装不进画布（"看不到全局"的根因） */
+    k = Math.max(0.05, Math.min(k, 1.9));
     this.view.k = k;
     this.view.x = this.width / 2 - ((minX + maxX) / 2) * k;
     this.view.y = this.height / 2 - ((minY + maxY) / 2) * k;
@@ -325,7 +327,7 @@
 
   Graph.prototype.zoomAt = function (px, py, factor) {
     var k0 = this.view.k;
-    var k1 = Math.max(0.18, Math.min(k0 * factor, 5));
+    var k1 = Math.max(0.05, Math.min(k0 * factor, 6));
     var ratio = k1 / k0;
     this.view.x = px - (px - this.view.x) * ratio;
     this.view.y = py - (py - this.view.y) * ratio;
@@ -644,7 +646,8 @@
       var url = (self.down && self.down.moved < 5 && self.down.hit) ? self.down.hit.url : '';
       self.pointers.delete(e.pointerId);
       if (self.pointers.size < 2) self.pinch = null;
-      if (self.drag) { self.drag.fixed = false; self.drag = null; }
+      /* 拖动过的节点松手后保持固定（用户摆好就留在那，双击节点可释放） */
+      if (self.drag) { self.drag.fixed = true; self.drag = null; }
       self.pan = null;
       self.down = null;
       cv.style.cursor = '';
@@ -674,9 +677,18 @@
       self.zoomAt(p.x, p.y, Math.exp(-e.deltaY * 0.0014));
     }, { passive: false });
 
-    cv.addEventListener('dblclick', function () {
-      self.fitView();
-      self.draw();
+    cv.addEventListener('dblclick', function (e) {
+      var p = self.localPoint(e);
+      var hit = self.hitTest(p.x, p.y);
+      if (hit) {
+        /* 双击节点：释放固定，让它回到力导向布局 */
+        hit.fixed = false;
+        self.kick();
+      } else {
+        /* 双击空白：看全局 */
+        self.fitView();
+        self.draw();
+      }
     });
 
     var reset = this.root.querySelector('.kb-reset');
@@ -686,9 +698,31 @@
         if (self.input) self.input.value = '';
         self.hover = null;
         if (self.tip) self.tip.hidden = true;
+        self.nodes.forEach(function (n) { n.fixed = false; });
         self.kick();
         self.temp = Math.min(self.worldW, self.worldH) * 0.12;
         self.relax(320);
+        self.fitView();
+        self.draw();
+      });
+    }
+
+    /* 缩放控件：滚轮/双指之外的显式入口（触摸设备与"看不到全局"兜底） */
+    var zoomIn = this.root.querySelector('.kb-zoom-in');
+    var zoomOut = this.root.querySelector('.kb-zoom-out');
+    var zoomFit = this.root.querySelector('.kb-zoom-fit');
+    if (zoomIn) {
+      zoomIn.addEventListener('click', function () {
+        self.zoomAt(self.width / 2, self.height / 2, 1.4);
+      });
+    }
+    if (zoomOut) {
+      zoomOut.addEventListener('click', function () {
+        self.zoomAt(self.width / 2, self.height / 2, 1 / 1.4);
+      });
+    }
+    if (zoomFit) {
+      zoomFit.addEventListener('click', function () {
         self.fitView();
         self.draw();
       });
