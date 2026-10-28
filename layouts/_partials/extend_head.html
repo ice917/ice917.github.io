@@ -28,3 +28,29 @@ try {
 {{- $js := resources.Get "js/kb-graph.js" | fingerprint "sha256" -}}
 <script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" crossorigin="anonymous"></script>
 {{- end -}}
+
+{{- /* "笔记"菜单项随书而变：在书内指向本书；在标签/归档等全局页回到最近读的那本书。
+       修的 bug：菜单里 /notes/ 写死，从《可验证支架》点"笔记"会跳到另一本《笔记》书。 */ -}}
+{{- $bookPaths := slice -}}
+{{- range site.Sections -}}{{- $bookPaths = $bookPaths | append .RelPermalink -}}{{- end -}}
+<script>
+(function () {
+  var books = {{ $bookPaths | jsonify | safeJS }};
+  var here = location.pathname;
+  var current = '';
+  books.forEach(function (b) { if (here.indexOf(b) === 0) current = b; });
+  var target = current;
+  if (target) {
+    try { localStorage.setItem('kb-last-book', target); } catch (e) {}
+  } else {
+    try { target = localStorage.getItem('kb-last-book') || ''; } catch (e) { target = ''; }
+    if (books.indexOf(target) < 0) target = '';
+  }
+  if (!target) return;
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('#menu a[href$="/notes/"]').forEach(function (a) {
+      a.href = target;
+    });
+  });
+})();
+</script>
