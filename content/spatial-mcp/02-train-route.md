@@ -2,6 +2,7 @@
 title: "2. 训练能救吗"
 date: 2026-10-28
 draft: false
+weight: 2
 tags: ["微调", "QLoRA", "证据分级", "背答案"]
 description: "合成数据+QLoRA 是主流路线，但增益证据多停留在预印本；8GB 笔记本的硬边界；以及'背答案'风险与 CoGenT 防污染设计。"
 ---

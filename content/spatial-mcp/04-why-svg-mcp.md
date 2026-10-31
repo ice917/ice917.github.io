@@ -2,6 +2,7 @@
 title: "4. 为什么是 SVG 和 MCP"
 date: 2026-10-28
 draft: false
+weight: 4
 tags: ["SVG", "MCP", "外部表征", "工具设计"]
 description: "SVG 是空间关系的最佳外部载体（认知科学 40 年前的结论）；MCP 是把裁判交付给 AI 的标准形态。9 个工具、20 条约束分三族、三档适用范围，边界一并写清。"
 ---

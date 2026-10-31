@@ -1,0 +1,11 @@
+{{- /* 书内上下篇导航：限定在「当前这本书」内部，不跨书。
+       覆盖 PaperMod 的 themes/PaperMod/layouts/_partials/post_nav_links.html ——
+       那个版本按 site.Params.mainSections 取页，配置了两本书后会跨书翻页。
+       排序沿用 Hugo 默认（weight → date → linktitle → filepath）。 */ -}}
+{{- $pages := .CurrentSection.RegularPages -}}
+{{- if and (gt (len $pages) 1) (in $pages .) -}}
+<nav class="paginav">
+  {{- with $pages.Next . }}<a class="prev" href="{{ .Permalink }}"><span class="title">« {{ i18n "prev_page" }}</span><span>{{- .Name -}}</span></a>{{- end }}
+  {{- with $pages.Prev . }}<a class="next" href="{{ .Permalink }}"><span class="title">{{ i18n "next_page" }} »</span><span>{{- .Name -}}</span></a>{{- end }}
+</nav>
+{{- end -}}

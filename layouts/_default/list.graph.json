@@ -3,6 +3,7 @@
   节点 = 本书笔记 + 标签枢纽
   边   = 笔记→标签（front matter 里的 tags）
         笔记→笔记（正文里指向本书其他笔记的 /<section>/<slug>/ 链接）
+        章节→章节（front matter 声明了 weight 时，按 weight 升序把相邻两页连起来）
   单一事实源：不写死任何关系，全部从内容文件推导。
   跨书的链接目标不在本书节点里，前端会自动丢弃这类边。
 */ -}}
@@ -72,6 +73,27 @@
           "kind" "link"
       ) -}}
     {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* ---------- 顺序边 ---------- */ -}}
+{{- /* 声明了 weight 的页面按 weight 升序相邻相连。
+       没有 weight 的书（notes）完全不受影响：$weighted 为空，不产生任何 seq 边。 */ -}}
+{{- $weighted := slice -}}
+{{- range $pages -}}
+  {{- if gt .Weight 0 -}}
+    {{- $weighted = $weighted | append . -}}
+  {{- end -}}
+{{- end -}}
+{{- $weighted = sort $weighted "Weight" -}}
+{{- range $i, $p := $weighted -}}
+  {{- if lt $i (sub (len $weighted) 1) -}}
+    {{- $next := index $weighted (add $i 1) -}}
+    {{- $links = $links | append (dict
+        "source" $p.File.ContentBaseName
+        "target" $next.File.ContentBaseName
+        "kind" "seq"
+    ) -}}
   {{- end -}}
 {{- end -}}
 

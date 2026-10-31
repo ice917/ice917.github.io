@@ -2,6 +2,7 @@
 title: "5. 实证：30 张场景卡"
 date: 2026-10-28
 draft: false
+weight: 5
 tags: ["实证", "评测", "svg-spatial-mcp"]
 description: "svg-spatial-mcp 的完整台账：裸生成 0.8892、4/30 完美；按断言反馈一轮修正后 1.0000、30/30。四个引擎级教训、soft 分数的 0.74 地板，以及这个对比能说明什么不能说明什么。"
 ---

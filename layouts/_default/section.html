@@ -1,4 +1,4 @@
-{{- /* 书页面：一个顶级 section 就是一本书。hero + 本书全图 + 笔记卡片墙。 */ -}}
+{{- /* 书页面：一个顶级 section 就是一本书。hero + 本书全图 + 内容卡片墙。 */ -}}
 {{- define "main" }}
 {{- $pages := .RegularPages -}}
 {{- $tags := slice -}}
@@ -10,6 +10,14 @@
 {{- range $pages -}}
   {{- if .Lastmod.After $latest -}}{{- $latest = .Lastmod -}}{{- end -}}
 {{- end -}}
+{{- /* 计量单位随书走：笔记书说「篇笔记」，章节书说「章」。缺省回落到「篇笔记」。 */ -}}
+{{- $L := .Params.labels | default dict -}}
+{{- $count := index $L "count" | default "篇笔记" -}}
+{{- $item := index $L "item" | default "笔记" -}}
+{{- $collection := index $L "collection" | default "本书笔记" -}}
+{{- $single := index $L "single" | default "这篇笔记" -}}
+{{- $empty := index $L "empty" | default "这本书还没有笔记" -}}
+{{- $edge := index $L "edge" | default "实线＝互相引用，虚线＝标签归属" -}}
 <div class="kb-book-page">
   <header class="kb-hero">
     <p class="kb-crumb"><a href="{{ "/" | relURL }}">书架</a><span class="kb-crumb__sep">/</span>{{ .Title }}</p>
@@ -18,7 +26,7 @@
     <p>{{ . }}</p>
     {{- end }}
     <div class="kb-stats">
-      <span><b>{{ len $pages }}</b> 篇笔记</span>
+      <span><b>{{ len $pages }}</b> {{ $count }}</span>
       <span><b>{{ len $tags }}</b> 个标签</span>
       {{- with .Params.author }}<span>作者 <b>{{ . }}</b></span>{{ end }}
       {{- with .Params.domain }}<span class="kb-domain">{{ . }}</span>{{ end }}
@@ -27,7 +35,7 @@
   </header>
 
   {{- if $pages }}
-  <div class="kb-graph" data-graph="{{ printf "%sgraph.json" .RelPermalink | relURL }}" data-mode="full" data-height="660">
+  <div class="kb-graph" data-graph="{{ printf "%sgraph.json" .RelPermalink | relURL }}" data-mode="full" data-height="660" data-note-label="{{ $item }}">
     <div class="kb-graph__bar">
       <label class="kb-search">
         <input type="search" placeholder="搜索标题、标签、摘要…" aria-label="搜索地图节点">
@@ -41,14 +49,14 @@
       <button type="button" class="kb-lock" aria-pressed="false" title="锁定后可用手指拖动地图；解锁后页面可正常上下滑动">锁定地图</button>
     </div>
     <div class="kb-graph__stage">
-      <canvas role="img" aria-label="本书知识关系图：节点是笔记与标签，实线是互相引用，虚线是标签归属"></canvas>
+      <canvas role="img" aria-label="本书知识关系图：节点是{{ $item }}与标签，实线是互相引用，虚线是标签归属"></canvas>
       <div class="kb-tip" hidden></div>
     </div>
     <div class="kb-graph__foot">
       <div class="kb-legend">
-        <span><i class="kb-dot"></i>笔记</span>
+        <span><i class="kb-dot"></i>{{ $item }}</span>
         <span><i class="kb-dot kb-dot--tag"></i>标签</span>
-        <span>实线＝互相引用，虚线＝标签归属</span>
+        <span>{{ $edge }}</span>
         <span>滚轮缩放 · 拖节点固定 · 双击空白看全局</span>
       </div>
       <span class="kb-status">正在加载…</span>
@@ -62,7 +70,7 @@
 
   {{- if $pages }}
   <section class="kb-book__notes">
-    <h2>本书笔记</h2>
+    <h2>{{ $collection }}</h2>
     <div class="kb-cards">
       {{- range $pages }}
       <article class="kb-card">
@@ -79,7 +87,7 @@
     </div>
   </section>
   {{- else }}
-  <p class="kb-empty">这本书还没有笔记。在 <code>content/{{ .Section }}/</code> 下新建 Markdown 文件即可。</p>
+  <p class="kb-empty">{{ $empty }}。在 <code>content/{{ .Section }}/</code> 下新建 Markdown 文件即可。</p>
   {{- end }}
 </div>
 {{- end }}

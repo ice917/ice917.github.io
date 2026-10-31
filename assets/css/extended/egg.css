@@ -341,8 +341,11 @@
     color: var(--hk-accent);
 }
 
-/* 正文首字下沉：正文第一段的首字改用铭文体并放大到 3 倍行高 */
-:root[data-egg="hogwarts"] .md-content > p:first-of-type::first-letter {
+/* 正文首字下沉：正文第一段的首字改用铭文体并放大到 3 倍行高。
+   紧跟在表格/代码块后面的段落不算开篇（如 3d-route-honesty 的第一个 <p> 在
+   四列表格之后、且以行内 <code> 开头，下沉会把 conjugate_3d_flow.py 劈成
+   一个孤立的大号「C」），这类段落跳过。 */
+:root[data-egg="hogwarts"] .md-content > p:first-of-type:not(table + p):not(pre + p)::first-letter {
     float: left;
     margin: .04em .12em 0 0;
     font-family: var(--hk-display);
@@ -391,6 +394,20 @@
         linear-gradient(0deg, rgba(0, 0, 0, .55) 0%, rgba(0, 0, 0, .14) 36%, rgba(0, 0, 0, 0) 66%),
         linear-gradient(155deg, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 48%),
         var(--hk-leather);
+}
+
+/* 两本书的封皮必须能一眼区分：皮革底色里掺进这本书自己的 accent（--book-accent
+   由书架页内联在 .kb-book 上，沿 CSS 继承传到这里）。
+   纯皮革色在彩蛋模式下会把两本书染成同色；掺色后仍保持皮革质感，
+   白字对比度不低于 9:1。不支持 color-mix 的浏览器沿用上面的纯皮革色。 */
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+    :root[data-egg="hogwarts"] .kb-book__cover {
+        background:
+            linear-gradient(180deg, rgba(0, 0, 0, .34) 0%, rgba(0, 0, 0, 0) 26%),
+            linear-gradient(0deg, rgba(0, 0, 0, .55) 0%, rgba(0, 0, 0, .14) 36%, rgba(0, 0, 0, 0) 66%),
+            linear-gradient(155deg, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 48%),
+            color-mix(in srgb, var(--hk-leather) 70%, var(--book-accent, #2f6fed));
+    }
 }
 
 /* 有真封面图的书不套皮革：上面的 .kb-book__cover 规则比 --image 更具体，

@@ -19,6 +19,7 @@
     /* 板块代码 → 中文名，未登记的直接显示原始段落名 */
     var SECTION_NAMES = {
         notes: "笔记",
+        "spatial-mcp": "可验证支架",
         tags: "标签",
         archives: "归档",
         search: "搜索",

@@ -5,6 +5,13 @@ author: ice
 domain: AI 认知
 accent: "#8b5cf6"
 weight: 20
+labels:
+  count: 章
+  item: 章节
+  collection: 本书章节
+  single: 这一章
+  empty: 这本书还没有章节
+  edge: 实线＝引用与前后章节，虚线＝标签归属
 ---
 这本书只回答一个问题：**AI 看不懂"谁在谁的哪边"这件事，到底该怎么解决。**
 
@@ -39,7 +46,7 @@ skill-opt 门控：5Why 找根因、拒绝投机对策、消融归因
 | 5 | [实证：30 张场景卡](/spatial-mcp/05-evidence/) | 0.8892 → 1.0 的完整台账 |
 | 6 | [skill-opt 方法论](/spatial-mcp/06-skillopt-method/) | 怎么保证"越改越准"而不是"越改越偏" |
 | 7 | [边界与下一步](/spatial-mcp/07-limits-next/) | 哪些结论还不能下、接下来做什么 |
-| 8 | [实现：4200 行代码在做什么](/spatial-mcp/08-implementation/) | 三层架构、七个几何模块与九个工具的逐函数职责、六个实现细节 |
+| 8 | [实现：4223 行代码在做什么](/spatial-mcp/08-implementation/) | 三层架构、七个几何模块与九个工具的逐函数职责、六个实现细节 |
 
 ## 阅读约定
 

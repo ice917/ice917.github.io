@@ -71,6 +71,8 @@
     this.focusId = root.dataset.focus || '';
     this.depth = Math.max(1, parseInt(root.dataset.depth || '1', 10));
     this.heightOverride = parseInt(root.dataset.height || '0', 10) || 0;
+    /* 普通节点的称呼由页面传入（笔记 / 章节），缺省沿用「笔记」 */
+    this.nodeLabel = root.dataset.noteLabel || '笔记';
 
     this.nodes = [];
     this.links = [];
@@ -504,7 +506,7 @@
     this.tip.hidden = false;
     this.tip.innerHTML =
       '<strong>' + esc(n.label) + '</strong>' +
-      '<em>' + (n.kind === 'tag' ? '标签' : '笔记') + ' · ' + n.deg + ' 连接</em>' +
+      '<em>' + (n.kind === 'tag' ? '标签' : this.nodeLabel) + ' · ' + n.deg + ' 连接</em>' +
       (n.summary ? '<span>' + esc(n.summary) + '</span>' : '');
     var tw = this.tip.offsetWidth;
     var th = this.tip.offsetHeight;

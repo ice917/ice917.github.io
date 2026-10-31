@@ -37,6 +37,12 @@ params:
   ShowWordCount: true
   ShowRssButtonInSectionTermList: true
 
+  # 「书」= 顶级 section。PaperMod 的归档页与首页列表都按 mainSections 取页面，
+  # 不写的话 Hugo 会回落到「页面数最多的顶级 section」，另一本书就进不了归档。
+  mainSections:
+    - notes
+    - spatial-mcp
+
   # 首页由 layouts/index.html 接管（知识地图），不使用 Profile 模式
   profileMode:
     enabled: false

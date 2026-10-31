@@ -2,6 +2,7 @@
 title: "1. AI 不会看位置"
 date: 2026-10-28
 draft: false
+weight: 1
 tags: ["空间推理", "组合泛化", "基准"]
 description: "空间推理差不是印象是实测：VSI-Bench 人类 79%、最佳模型低 33 分；组合泛化在未见组合上崩坏。差在哪三类问题上。"
 ---

@@ -2,6 +2,7 @@
 title: "6. skill-opt 方法论：越改越准，而不是越改越偏"
 date: 2026-10-28
 draft: false
+weight: 6
 tags: ["方法论", "skill-opt", "5Why", "门控"]
 description: "优化 AI 工具/技能的纪律：5Why 找根因、gate 拒绝投机对策、'计算口径'六要素、归因式消融。用一次真实的 schema 优化走完整个循环。"
 ---

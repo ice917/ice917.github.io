@@ -1,14 +1,19 @@
-{{- /* 笔记正文之后：这篇笔记在所属那本书里的局部邻域（1 跳） */ -}}
+{{- /* 正文之后：这一篇在所属那本书里的局部邻域（1 跳） */ -}}
 {{- if and .IsPage (ne .Section "") .File -}}
 {{- $slug := .File.ContentBaseName -}}
+{{- /* 计量单位随书走：章节书说「这一章」，笔记书说「这篇笔记」。 */ -}}
+{{- $L := .CurrentSection.Params.labels | default dict -}}
+{{- $item := index $L "item" | default "笔记" -}}
+{{- $single := index $L "single" | default "这篇笔记" -}}
 <section class="kb-neighbors">
-  <h2>这篇笔记在知识地图中的位置</h2>
+  <h2>{{ $single }}在知识地图中的位置</h2>
   <div class="kb-graph"
        data-graph="{{ printf "%sgraph.json" .CurrentSection.RelPermalink | relURL }}"
        data-mode="focus"
        data-focus="{{ $slug }}"
        data-depth="1"
-       data-height="380">
+       data-height="380"
+       data-note-label="{{ $item }}">
     <div class="kb-graph__bar">
       <label class="kb-search">
         <input type="search" placeholder="在邻域里搜索…" aria-label="搜索邻域节点">
@@ -22,12 +27,12 @@
       <button type="button" class="kb-lock" aria-pressed="false" title="锁定后可用手指拖动地图；解锁后页面可正常上下滑动">锁定地图</button>
     </div>
     <div class="kb-graph__stage">
-      <canvas role="img" aria-label="这篇笔记及其相邻笔记、标签的关系图"></canvas>
+      <canvas role="img" aria-label="{{ $single }}及其相邻{{ $item }}、标签的关系图"></canvas>
       <div class="kb-tip" hidden></div>
     </div>
     <div class="kb-graph__foot">
       <div class="kb-legend">
-        <span><i class="kb-dot"></i>笔记</span>
+        <span><i class="kb-dot"></i>{{ $item }}</span>
         <span><i class="kb-dot kb-dot--tag"></i>标签</span>
         <span>滚轮缩放 · 拖节点固定</span>
       </div>
